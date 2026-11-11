@@ -22,7 +22,6 @@ class LoginController extends ChangeNotifier {
   Future<bool> login() async {
     isLoading = true;
     notifyListeners();
-    debugger(); // Breakpoint: Login controller execution started
 
     try {
       final user = await _loginUseCase(

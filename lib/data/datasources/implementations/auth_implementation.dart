@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -28,7 +27,7 @@ class AuthImplementation implements AuthData {
   Future<User> login({
     required String username,
     required String password,
-  }) async { // Breakpoint: Start login
+  }) async {
     final requestToken = await createRequestToken();
 
     final validatedToken = await validateLogin(
@@ -71,7 +70,6 @@ class AuthImplementation implements AuthData {
     required String requestToken,
   }) async {
     try {
-      debugger(); // Breakpoint: Before validating login credentials
       final response = await _dio.post(
         '/authentication/token/validate_with_login',
         queryParameters: {'api_key': Environment.production.apiKey},
