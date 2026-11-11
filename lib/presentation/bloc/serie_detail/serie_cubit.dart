@@ -3,8 +3,8 @@ import 'package:bloc/bloc.dart';
 import '../../../core/locator.dart';
 import '../../../data/models/tv_crew_model.dart';
 import '../../../data/models/tv_show_model.dart';
-import '../../../domain/usecases/get_tv_show_crew_usecase.dart';
-import '../../../domain/usecases/get_tv_show_details_usecase.dart';
+import '../../../domain/usecases/tv_show/get_tv_show_crew_usecase.dart';
+import '../../../domain/usecases/tv_show/get_tv_show_details_usecase.dart';
 
 part 'serie_state.dart';
 

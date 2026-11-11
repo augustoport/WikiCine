@@ -1,10 +1,11 @@
+import 'dart:developer';
 import 'package:flutter/material.dart';
 
 import '../../../core/locator.dart';
 import '../../../domain/entities/user.dart';
-import '../../../domain/usecases/get_current_user_usecase.dart';
-import '../../../domain/usecases/login_usecase.dart';
-import '../../../domain/usecases/logout_usecase.dart';
+import '../../domain/usecases/user/get_current_user_usecase.dart';
+import '../../domain/usecases/auth/login_usecase.dart';
+import '../../domain/usecases/auth/logout_usecase.dart';
 
 class LoginController extends ChangeNotifier {
   TextEditingController emailController = TextEditingController();
@@ -21,6 +22,7 @@ class LoginController extends ChangeNotifier {
   Future<bool> login() async {
     isLoading = true;
     notifyListeners();
+    debugger(); // Breakpoint: Login controller execution started
 
     try {
       final user = await _loginUseCase(

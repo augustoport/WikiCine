@@ -132,7 +132,7 @@ class _LoginPageState extends State<LoginPage> {
               padding: EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
                 color: loginController.isLoading
-                    ? AppColors.primaryColor.withOpacity(0.5)
+                    ? AppColors.primaryColor.withValues(alpha: 0.5)
                     : AppColors.primaryColor,
                 borderRadius: BorderRadius.circular(10),
               ),

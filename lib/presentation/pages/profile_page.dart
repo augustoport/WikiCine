@@ -13,6 +13,7 @@ class ProfilePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       body: Column(children: [ProfileHeader(user: controller.currentUser)]),
+      
     );
   }
 }
@@ -23,8 +24,14 @@ class ProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context);
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.only(
+        left: 16,
+        right: 16,
+        top: size.padding.top + 20,
+        bottom: 15,
+      ),
       decoration: BoxDecoration(color: AppColors.primaryColor),
       child: Row(
         children: [

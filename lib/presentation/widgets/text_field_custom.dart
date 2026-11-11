@@ -25,9 +25,10 @@ class TextFieldCustom extends StatefulWidget {
 }
 
 class _TextFieldCustomState extends State<TextFieldCustom> {
+  late bool obscureText = widget.isPassword ?? false;
+
   @override
   Widget build(BuildContext context) {
-    bool obscureText = widget.isPassword ?? false;
     return Container(
       padding: widget.padding ?? const EdgeInsets.symmetric(horizontal: 10),
       margin: widget.margin ?? const EdgeInsets.symmetric(horizontal: 10),
@@ -50,13 +51,13 @@ class _TextFieldCustomState extends State<TextFieldCustom> {
             ),
           ),
           if (widget.isPassword == true) ...[
-            InkWell(
-              onTap: () {
+            IconButton(
+              onPressed: () {
                 setState(() {
                   obscureText = !obscureText;
                 });
               },
-              child: Icon(
+              icon: Icon(
                 obscureText ? Icons.visibility : Icons.visibility_off,
               ),
             ),

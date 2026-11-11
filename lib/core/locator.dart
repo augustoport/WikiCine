@@ -1,3 +1,4 @@
+import 'package:cinerating/presentation/bloc/profile/profile_cubit.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 
@@ -16,17 +17,17 @@ import '../data/repositories/tv_api.dart';
 import '../domain/repositories/auth_repository.dart';
 import '../domain/repositories/movie_repository.dart';
 import '../domain/repositories/tv_repository.dart';
-import '../domain/usecases/get_current_user_usecase.dart';
-import '../domain/usecases/get_movie_crew_usecase.dart';
-import '../domain/usecases/get_movie_details_usecase.dart';
-import '../domain/usecases/get_movies_usecase.dart';
-import '../domain/usecases/get_tv_show_crew_usecase.dart';
-import '../domain/usecases/get_tv_show_details_usecase.dart';
-import '../domain/usecases/get_tv_shows_usecase.dart';
-import '../domain/usecases/login_usecase.dart';
-import '../domain/usecases/logout_usecase.dart';
-import '../domain/usecases/search_movies_usecase.dart';
-import '../domain/usecases/search_tv_shows_usecase.dart';
+import '../domain/usecases/user/get_current_user_usecase.dart';
+import '../domain/usecases/movies/get_movie_crew_usecase.dart';
+import '../domain/usecases/movies/get_movie_details_usecase.dart';
+import '../domain/usecases/movies/get_movies_usecase.dart';
+import '../domain/usecases/tv_show/get_tv_show_crew_usecase.dart';
+import '../domain/usecases/tv_show/get_tv_show_details_usecase.dart';
+import '../domain/usecases/tv_show/get_tv_shows_usecase.dart';
+import '../domain/usecases/auth/login_usecase.dart';
+import '../domain/usecases/auth/logout_usecase.dart';
+import '../domain/usecases/movies/search_movies_usecase.dart';
+import '../domain/usecases/tv_show/search_tv_shows_usecase.dart';
 
 final getIt = GetIt.instance;
 
@@ -53,7 +54,7 @@ void setupLocator() {
   );
 
   getIt.registerLazySingleton<MovieRepository>(
-    () => MovieRepositoryImpl(remoteDataSource: getIt<MovieData>()),
+    () => MovieApi(movieData: getIt<MovieData>()),
   );
 
   getIt.registerLazySingleton<TvRepository>(
@@ -112,4 +113,6 @@ void setupLocator() {
 
   // Cubits
   getIt.registerFactory<HomeCubit>(() => HomeCubit());
+
+  getIt.registerFactory<ProfileCubit>(() => ProfileCubit());
 }

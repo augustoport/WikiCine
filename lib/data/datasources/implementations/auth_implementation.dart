@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -27,15 +28,19 @@ class AuthImplementation implements AuthData {
   Future<User> login({
     required String username,
     required String password,
-  }) async {
+  }) async { // Breakpoint: Start login
     final requestToken = await createRequestToken();
+
     final validatedToken = await validateLogin(
       username: username,
       password: password,
       requestToken: requestToken,
     );
+
     final sessionId = await createSession(validatedToken);
+
     await _storage.write(key: 'tmdb_session_id', value: sessionId);
+
     return await getAccountDetails(sessionId);
   }
 
@@ -46,12 +51,18 @@ class AuthImplementation implements AuthData {
       queryParameters: {'session_id': sessionId},
     );
 
+    final accountId = response.data['id']?.toString() ?? '';
+    await _storage.write(key: 'account_id', value: accountId);
+
     return UserModel.fromJson(response.data, sessionId);
   }
 
   Future<String> createRequestToken() async {
-    final response = await _dio.get('/authentication/token/new');
-    return response.data['request_token'];
+    final response = await _dio.get(
+      '/authentication/token/new',
+      queryParameters: {'api_key': Environment.production.apiKey},
+    );
+    return response.data['request_token']?.toString() ?? '';
   }
 
   Future<String> validateLogin({
@@ -59,22 +70,29 @@ class AuthImplementation implements AuthData {
     required String password,
     required String requestToken,
   }) async {
-    final response = await _dio.post(
-      '/authentication/token/validate_with_login',
-      data: {
-        'username': username,
-        'password': password,
-        'request_token': requestToken,
-      },
-    );
-    return response.data['request_token'];
+    try {
+      debugger(); // Breakpoint: Before validating login credentials
+      final response = await _dio.post(
+        '/authentication/token/validate_with_login',
+        queryParameters: {'api_key': Environment.production.apiKey},
+        data: {
+          'username': username,
+          'password': password,
+          'request_token': requestToken,
+        },
+      );
+      return response.data['request_token']?.toString() ?? '';
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<String> createSession(String requestToken) async {
     final response = await _dio.post(
       '/authentication/session/new',
+      queryParameters: {'api_key': Environment.production.apiKey},
       data: {'request_token': requestToken},
     );
-    return response.data['session_id'];
+    return response.data['session_id']?.toString() ?? '';
   }
 }

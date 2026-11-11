@@ -1,4 +1,6 @@
+import 'package:cinerating/data/models/movie_detail_model.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../../domain/entities/movie.dart';
 import '../../models/movie_simple_model.dart';
@@ -7,6 +9,7 @@ import '../data/movie_data.dart';
 
 class MovieImplementation implements MovieData {
   final Dio _dio = Dio();
+  final _storage = FlutterSecureStorage();
 
   MovieImplementation() {
     _dio.options.headers["Authorization"] =
@@ -17,9 +20,15 @@ class MovieImplementation implements MovieData {
   @override
   Future<List<Movie>> getMovies() async {
     final response = await _dio.get('/discover/movie');
-    return (response.data['results'] as List)
-        .map((json) => _mapToEntity(MovieSimpleModel.fromMap(json)))
-        .toList();
+
+    List<Movie> movieList = [];
+
+    for (var m in (response.data['results'] as List)) {
+      Movie movie = MovieSimpleModel.fromMap(m);
+      movieList.add(movie);
+    }
+
+    return movieList;
   }
 
   @override
@@ -28,30 +37,22 @@ class MovieImplementation implements MovieData {
       '/search/movie',
       queryParameters: {'query': query, 'language': 'en-US;pt-BR'},
     );
-    return (response.data['results'] as List)
-        .map((json) => _mapToEntity(MovieSimpleModel.fromMap(json)))
-        .toList();
+
+    List<Movie> movieList = [];
+
+    for (var m in (response.data['results'] as List)) {
+      Movie movie = MovieSimpleModel.fromMap(m);
+      movieList.add(movie);
+    }
+
+    return movieList;
   }
 
   @override
   Future<Movie> getMovieDetails(String movieId) async {
     final response = await _dio.get('/movie/$movieId');
-    final model = MovieSimpleModel.fromMap(response.data);
-    return _mapToEntity(model);
-  }
-
-  Movie _mapToEntity(MovieSimpleModel model) {
-    return Movie(
-      id: model.id ?? 0,
-      title: model.title,
-      name: model.name,
-      overview: model.overview,
-      posterPath: model.posterPath,
-      backdropPath: model.backdropPath,
-      voteAverage: model.voteAverage,
-      releaseDate: model.releaseDate,
-      genreIds: model.genreIds,
-    );
+    Movie model = MovieDetailModel.fromMap(response.data);
+    return model;
   }
 
   @override
@@ -64,5 +65,19 @@ class MovieImplementation implements MovieData {
   Future<dynamic> getMovieDetailsFull(String movieId) async {
     final response = await _dio.get('/movie/$movieId');
     return response.data;
+  }
+
+  @override
+  Future<List<Movie>> getFavoriteMovies() async {
+    final id = await _storage.read(key: 'account_id');
+    final response = await _dio.get('/account/$id/favorite/movies');
+
+    List<Movie> movieList = [];
+
+    for (var m in (response.data['results'] as List)) {
+      final movie = MovieDetailModel.fromMap(m);
+      movieList.add(movie);
+    }
+    return movieList;
   }
 }

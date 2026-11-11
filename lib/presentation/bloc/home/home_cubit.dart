@@ -2,11 +2,10 @@ import 'package:bloc/bloc.dart';
 import 'package:cinerating/core/locator.dart';
 import 'package:cinerating/domain/entities/movie.dart';
 import 'package:cinerating/domain/entities/tv_show.dart';
-import 'package:cinerating/domain/usecases/get_movies_usecase.dart';
-import 'package:cinerating/domain/usecases/get_tv_shows_usecase.dart';
-import 'package:cinerating/domain/usecases/search_movies_usecase.dart';
-import 'package:cinerating/domain/usecases/search_tv_shows_usecase.dart';
-import 'package:cinerating/data/models/movie_simple_model.dart';
+import 'package:cinerating/domain/usecases/movies/get_movies_usecase.dart';
+import 'package:cinerating/domain/usecases/tv_show/get_tv_shows_usecase.dart';
+import 'package:cinerating/domain/usecases/movies/search_movies_usecase.dart';
+import 'package:cinerating/domain/usecases/tv_show/search_tv_shows_usecase.dart';
 
 part 'home_states.dart';
 
@@ -27,8 +26,7 @@ class HomeCubit extends Cubit<HomeStates> {
     emit(HomeLoading());
     try {
       final movies = await _getMoviesUseCase();
-      final movieModels = movies.map(_mapToModel).toList();
-      emit(HomeMovie(movieModels));
+      emit(HomeMovie(movies));
     } catch (e) {
       emit(HomeError('Não foi possível carregar os filmes'));
     }
@@ -39,8 +37,7 @@ class HomeCubit extends Cubit<HomeStates> {
     try {
       if (movie != null && movie != "") {
         final movies = await _searchMoviesUseCase(movie);
-        final movieModels = movies.map(_mapToModel).toList();
-        emit(HomeMovie(movieModels));
+        emit(HomeMovie(movies));
       } else {
         getMovies();
       }
@@ -53,8 +50,7 @@ class HomeCubit extends Cubit<HomeStates> {
     emit(HomeLoading());
     try {
       final tvShows = await _getTvShowsUseCase();
-      final tvShowModels = tvShows.map((tv) => _mapToModelTV(tv)).toList();
-      emit(HomeTv(tvShowModels));
+      emit(HomeTv(tvShows));
     } catch (e) {
       emit(HomeError('Não foi possível carregar os programas de TV'));
     }
@@ -65,43 +61,12 @@ class HomeCubit extends Cubit<HomeStates> {
     try {
       if (show != null && show != "") {
         final tvShows = await _searchTvShowsUseCase(show);
-        final tvShowModels = tvShows
-            .map((tvShow) => _mapToModelTV(tvShow))
-            .toList();
-        emit(HomeTv(tvShowModels));
+        emit(HomeTv(tvShows));
       } else {
         getTvShows();
       }
     } catch (e) {
       emit(HomeError("Não foi possivel buscar o programa de TV"));
     }
-  }
-
-  Movie _mapToModel(Movie movie) {
-    return Movie(
-      id: movie.id,
-      title: movie.title,
-      name: movie.name,
-      overview: movie.overview,
-      posterPath: movie.posterPath,
-      backdropPath: movie.backdropPath,
-      voteAverage: movie.voteAverage,
-      releaseDate: movie.releaseDate,
-      genreIds: movie.genreIds,
-    );
-  }
-
-  Movie _mapToModelTV(TvShow tvShow) {
-    return Movie(
-      id: tvShow.id,
-      title: tvShow.name,
-      name: tvShow.name,
-      overview: tvShow.overview,
-      posterPath: tvShow.posterPath,
-      backdropPath: tvShow.backdropPath,
-      voteAverage: tvShow.voteAverage,
-      releaseDate: tvShow.firstAirDate,
-      genreIds: tvShow.genreIds,
-    );
   }
 }

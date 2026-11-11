@@ -222,8 +222,8 @@ class ContentDetail extends StatelessWidget {
 }
 
 class ContentCreditWidget extends StatelessWidget {
-  final cast;
-  final director;
+  final dynamic cast;
+  final dynamic director;
   const ContentCreditWidget(this.cast, this.director, {super.key});
 
   @override

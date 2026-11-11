@@ -2,33 +2,38 @@ import '../../domain/entities/movie.dart';
 import '../../domain/repositories/movie_repository.dart';
 import '../datasources/data/movie_data.dart';
 
-class MovieRepositoryImpl implements MovieRepository {
-  final MovieData remoteDataSource;
+class MovieApi implements MovieRepository {
+  final MovieData movieData;
 
-  MovieRepositoryImpl({required this.remoteDataSource});
+  MovieApi({required this.movieData});
 
   @override
   Future<List<Movie>> getMovies() {
-    return remoteDataSource.getMovies();
+    return movieData.getMovies();
   }
 
   @override
   Future<List<Movie>> searchMovies(String query) {
-    return remoteDataSource.searchMovies(query);
+    return movieData.searchMovies(query);
   }
 
   @override
   Future<Movie> getMovieDetails(String movieId) {
-    return remoteDataSource.getMovieDetails(movieId);
+    return movieData.getMovieDetails(movieId);
   }
 
   @override
   Future<dynamic> getMovieCrew(String movieId) {
-    return remoteDataSource.getMovieCrew(movieId);
+    return movieData.getMovieCrew(movieId);
   }
 
   @override
   Future<dynamic> getMovieDetailsFull(String movieId) {
-    return remoteDataSource.getMovieDetailsFull(movieId);
+    return movieData.getMovieDetailsFull(movieId);
+  }
+
+  @override
+  Future<List<Movie>> getFavoriteMovies() {
+    return movieData.getFavoriteMovies();
   }
 }

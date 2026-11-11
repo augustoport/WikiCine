@@ -6,7 +6,6 @@ import 'package:cinerating/presentation/controllers/home_controller.dart';
 import 'package:cinerating/presentation/controllers/login_controller.dart';
 import 'package:cinerating/presentation/bloc/home/home_cubit.dart';
 import 'package:cinerating/core/locator.dart';
-import 'package:cinerating/core/shared/env.dart';
 import 'package:cinerating/core/shared/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -213,8 +212,7 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                         children: [
                           ClipOval(
                             child: Image.network(
-                                  (loginController.currentUser?.avatar?.tmdb ??
-                                      ""),
+                              (loginController.currentUser?.avatar?.tmdb ?? ""),
                               width: 50,
                               height: 50,
                             ),

@@ -1,13 +1,12 @@
 import 'package:cinerating/presentation/pages/tv_show_detail_page.dart';
 import 'package:flutter/material.dart';
 
-import '../../domain/entities/movie.dart';
 import '../pages/movie_detail_page.dart';
 import 'movie_card.dart';
 
 class ContentList extends StatelessWidget {
   final RefreshCallback onRefresh;
-  final List<Movie> content;
+  final List<dynamic> content;
   final String type;
   const ContentList({
     super.key,

@@ -4,8 +4,8 @@ import 'package:cinerating/domain/entities/movie.dart';
 import '../../../core/locator.dart';
 import '../../../data/models/crew_model.dart';
 import '../../../data/models/movie_detail_model.dart';
-import '../../../domain/usecases/get_movie_crew_usecase.dart';
-import '../../../domain/usecases/get_movie_details_usecase.dart';
+import '../../../domain/usecases/movies/get_movie_crew_usecase.dart';
+import '../../../domain/usecases/movies/get_movie_details_usecase.dart';
 
 part 'movie_states.dart';
 

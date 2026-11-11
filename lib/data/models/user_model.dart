@@ -12,10 +12,10 @@ class UserModel extends User {
 
   factory UserModel.fromJson(Map<String, dynamic> json, String sessionId) {
     return UserModel(
-      id: json['id'],
-      username: json['username'],
-      name: json['name'],
-      avatar: AvatarModel.fromJson(json['avatar']),
+      id: json['id'] is int ? json['id'] : int.tryParse(json['id']?.toString() ?? ''),
+      username: json['username']?.toString(),
+      name: json['name']?.toString() ?? json['username']?.toString(),
+      avatar: json['avatar'] is Map ? AvatarModel.fromJson(json['avatar']) : null,
       sessionId: sessionId,
     );
   }
@@ -25,10 +25,12 @@ class UserModel extends User {
       'id': id,
       'username': username,
       'name': name,
-      'avatar': AvatarModel(
-        gravatar: avatar?.gravatar ?? '',
-        tmdb: avatar?.tmdb ?? '',
-      ).toJson(),
+      'avatar': avatar != null
+          ? AvatarModel(
+              gravatar: avatar!.gravatar,
+              tmdb: avatar!.tmdb,
+            ).toJson()
+          : null,
       'sessionId': sessionId,
     };
   }
@@ -38,9 +40,19 @@ class AvatarModel extends Avatar {
   AvatarModel({required super.gravatar, required super.tmdb});
 
   factory AvatarModel.fromJson(Map<String, dynamic> json) {
+    final gravatarMap = json['gravatar'] is Map ? json['gravatar'] : null;
+    final tmdbMap = json['tmdb'] is Map ? json['tmdb'] : null;
+
+    final gravatarHash = gravatarMap?['hash']?.toString();
+    final tmdbPath = tmdbMap?['avatar_path']?.toString();
+
     return AvatarModel(
-      gravatar: Environment.production.mediaUrl + json['gravatar']['hash'],
-      tmdb: Environment.production.mediaUrl + json['tmdb']['avatar_path'],
+      gravatar: gravatarHash != null && gravatarHash.isNotEmpty
+          ? Environment.production.mediaUrl + gravatarHash
+          : '',
+      tmdb: tmdbPath != null && tmdbPath.isNotEmpty
+          ? Environment.production.mediaUrl + tmdbPath
+          : '',
     );
   }
 

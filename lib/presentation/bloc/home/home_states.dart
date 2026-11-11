@@ -15,7 +15,7 @@ class HomeMovie extends HomeStates {
 class HomeTv extends HomeStates {
   HomeTv(this.tvShows);
 
-  final List<Movie>? tvShows;
+  final List<TvShow>? tvShows;
 }
 
 class HomePeople extends HomeStates {}
