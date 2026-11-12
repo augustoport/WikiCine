@@ -8,10 +8,7 @@ class AuthApi implements AuthRepository {
   final AuthData authData;
   final FlutterSecureStorage storage;
 
-  AuthApi({
-    required this.authData,
-    required this.storage,
-  });
+  AuthApi(this.authData, this.storage);
 
   @override
   Future<User> login({required String username, required String password}) {

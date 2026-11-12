@@ -3,6 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 
 import '../presentation/bloc/home/home_cubit.dart';
+import '../presentation/bloc/movie_detail/movie_cubit.dart';
 import '../presentation/controllers/home_controller.dart';
 import '../presentation/controllers/login_controller.dart';
 import '../data/datasources/data/auth_data.dart';
@@ -28,33 +29,27 @@ import '../domain/usecases/auth/login_usecase.dart';
 import '../domain/usecases/auth/logout_usecase.dart';
 import '../domain/usecases/movies/search_movies_usecase.dart';
 import '../domain/usecases/tv_show/search_tv_shows_usecase.dart';
+import 'shared/themes/app_colors.dart';
 
 final getIt = GetIt.instance;
 
 void setupLocator() {
+  getIt.registerSingleton<AppColors>(AppColors());
+
   // Datasources
-  getIt.registerLazySingleton<AuthData>(
-    () => AuthImplementation(),
-  );
+  getIt.registerLazySingleton<AuthData>(() => AuthImplementation());
 
-  getIt.registerLazySingleton<MovieData>(
-    () => MovieImplementation(),
-  );
+  getIt.registerLazySingleton<MovieData>(() => MovieImplementation());
 
-  getIt.registerLazySingleton<TvData>(
-    () => TvImplementation(),
-  );
+  getIt.registerLazySingleton<TvData>(() => TvImplementation());
 
   // Repositories
   getIt.registerLazySingleton<AuthRepository>(
-    () => AuthApi(
-      authData: getIt<AuthData>(),
-      storage: const FlutterSecureStorage(),
-    ),
+    () => AuthApi(getIt<AuthData>(), const FlutterSecureStorage()),
   );
 
   getIt.registerLazySingleton<MovieRepository>(
-    () => MovieApi(movieData: getIt<MovieData>()),
+    () => MovieApi(getIt<MovieData>()),
   );
 
   getIt.registerLazySingleton<TvRepository>(
@@ -115,4 +110,6 @@ void setupLocator() {
   getIt.registerFactory<HomeCubit>(() => HomeCubit());
 
   getIt.registerFactory<ProfileCubit>(() => ProfileCubit());
+
+  getIt.registerFactory<MovieCubit>(() => MovieCubit());
 }

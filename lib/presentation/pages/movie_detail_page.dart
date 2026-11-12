@@ -3,6 +3,7 @@ import 'package:cinerating/presentation/widgets/content_detail.dart';
 import 'package:cinerating/core/shared/themes/app_colors.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../core/locator.dart';
 
 class MovieDetailPage extends StatefulWidget {
   final String movieId;
@@ -13,8 +14,8 @@ class MovieDetailPage extends StatefulWidget {
 }
 
 class _MovieDetailPageState extends State<MovieDetailPage> {
-  MovieCubit movieCubit = MovieCubit();
-  AppColors appColors = AppColors();
+  final movieCubit = getIt<MovieCubit>();
+  final appColors = getIt<AppColors>();
 
   @override
   void initState() {
@@ -43,6 +44,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
               type: "movie",
               cast: state.cast,
               director: state.director,
+              isFavorite: state.isFavorite,
             );
           } else {
             return Center(

@@ -1,3 +1,4 @@
+import 'package:cinerating/core/locator.dart';
 import 'package:cinerating/data/models/crew_model.dart';
 import 'package:cinerating/presentation/widgets/cast_card.dart';
 import 'package:material_ui/material_ui.dart';
@@ -10,12 +11,14 @@ class ContentDetail extends StatelessWidget {
   final dynamic cast;
   final dynamic director;
   final String type;
+  final bool? isFavorite;
   const ContentDetail({
     super.key,
     required this.content,
     required this.type,
     this.cast,
     this.director,
+    this.isFavorite = false,
   });
 
   @override
@@ -56,6 +59,9 @@ class ContentDetail extends StatelessWidget {
                       borderRadius: BorderRadius.all(Radius.circular(4)),
                       child: Image.network(
                         content.backdropPath ?? "",
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(color: AppColors.backgroundColor);
+                        },
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -106,13 +112,28 @@ class ContentDetail extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
+                  mainAxisAlignment: .spaceBetween,
                   children: [
-                    Text(
-                      type == 'movie' ? content.title : content.name,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: Text(
+                        type == 'movie' ? content.title : content.name,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 25,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        
+                      },
+                      child: Icon(
+                        isFavorite == true
+                            ? Icons.favorite
+                            : Icons.favorite_border,
+                        color: isFavorite == true ? Colors.red : Colors.white,
+                        size: 25,
                       ),
                     ),
                   ],

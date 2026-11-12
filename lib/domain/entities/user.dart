@@ -6,7 +6,7 @@ class User {
   final String? name;
   final Avatar? avatar;
   final String? sessionId;
-  final List<Movie?>? favoriteMovies;
+  List<Movie?>? favoriteMovies;
 
   User({
     this.id,

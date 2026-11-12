@@ -78,6 +78,8 @@ class MovieImplementation implements MovieData {
       final movie = MovieDetailModel.fromMap(m);
       movieList.add(movie);
     }
+
+    
     return movieList;
   }
 }

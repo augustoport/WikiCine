@@ -10,8 +10,9 @@ class MovieSuccess extends MovieStates {
   final Movie movieDetail;
   final List<CrewModel> cast;
   final CrewModel director;
+  final bool isFavorite;
 
-  MovieSuccess(this.movieDetail, this.cast, this.director);
+  MovieSuccess(this.movieDetail, this.cast, this.director, this.isFavorite);
 }
 
 class MovieError extends MovieStates {

@@ -1,3 +1,4 @@
+import 'package:cinerating/data/repositories/movie_api.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -5,6 +6,7 @@ import '../../../domain/entities/user.dart';
 import '../../../core/shared/env.dart';
 import '../../models/user_model.dart';
 import '../data/auth_data.dart';
+import 'movie_implementation.dart';
 
 class AuthImplementation implements AuthData {
   final Dio _dio;
@@ -44,7 +46,7 @@ class AuthImplementation implements AuthData {
   }
 
   @override
-  Future<UserModel> getAccountDetails(String sessionId) async {
+  Future<User> getAccountDetails(String sessionId) async {
     final response = await _dio.get(
       '/account',
       queryParameters: {'session_id': sessionId},
@@ -53,7 +55,15 @@ class AuthImplementation implements AuthData {
     final accountId = response.data['id']?.toString() ?? '';
     await _storage.write(key: 'account_id', value: accountId);
 
-    return UserModel.fromJson(response.data, sessionId);
+    final favoriteMovies = await MovieApi(
+      MovieImplementation(),
+    ).getFavoriteMovies();
+
+    User user = UserModel.fromJson(response.data, sessionId);
+
+    user.favoriteMovies = favoriteMovies;
+
+    return user;
   }
 
   Future<String> createRequestToken() async {

@@ -5,7 +5,7 @@ import '../datasources/data/movie_data.dart';
 class MovieApi implements MovieRepository {
   final MovieData movieData;
 
-  MovieApi({required this.movieData});
+  MovieApi(this.movieData);
 
   @override
   Future<List<Movie>> getMovies() {
