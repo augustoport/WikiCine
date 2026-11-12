@@ -2,7 +2,6 @@ import 'package:bloc/bloc.dart';
 import 'package:cinerating/presentation/bloc/profile/profile_states.dart';
 
 import '../../../core/locator.dart';
-import '../../../data/repositories/movie_api.dart';
 import '../../../domain/repositories/movie_repository.dart';
 
 class ProfileCubit extends Cubit<ProfileStates> {

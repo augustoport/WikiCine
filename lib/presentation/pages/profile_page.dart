@@ -1,5 +1,5 @@
 import 'package:cinerating/presentation/pages/movie_detail_page.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../core/locator.dart';
 import '../../core/shared/themes/app_colors.dart';
@@ -21,7 +21,7 @@ class _ProfilePageState extends State<ProfilePage> {
   final bloc = getIt<ProfileCubit>();
 
   @override
-  initState() {
+  void initState() {
     bloc.initProfile();
     super.initState();
   }

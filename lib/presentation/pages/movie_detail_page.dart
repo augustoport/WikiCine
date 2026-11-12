@@ -1,7 +1,7 @@
 import 'package:cinerating/presentation/bloc/movie_detail/movie_cubit.dart';
 import 'package:cinerating/presentation/widgets/content_detail.dart';
 import 'package:cinerating/core/shared/themes/app_colors.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MovieDetailPage extends StatefulWidget {
@@ -17,7 +17,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
   AppColors appColors = AppColors();
 
   @override
-  initState() {
+  void initState() {
     Future.microtask(() {
       movieCubit.getMovieDetails(widget.movieId);
     });

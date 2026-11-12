@@ -1,5 +1,5 @@
 import 'package:cinerating/presentation/bloc/home/home_cubit.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class HomeController {
   final TextEditingController searchController = TextEditingController();

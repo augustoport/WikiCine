@@ -1,6 +1,6 @@
 import 'package:cinerating/data/models/crew_model.dart';
 import 'package:cinerating/presentation/widgets/cast_card.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/shared/themes/app_colors.dart';

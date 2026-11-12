@@ -41,6 +41,7 @@ dependencies:
   firebase_core: ^4.15.0
   get_it: ^8.0.0
 
+  material_ui: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

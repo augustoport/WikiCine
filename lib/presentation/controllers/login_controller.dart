@@ -1,5 +1,5 @@
 import 'dart:developer';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../core/locator.dart';
 import '../../../domain/entities/user.dart';
@@ -7,7 +7,7 @@ import '../../domain/usecases/user/get_current_user_usecase.dart';
 import '../../domain/usecases/auth/login_usecase.dart';
 import '../../domain/usecases/auth/logout_usecase.dart';
 
-class LoginController extends ChangeNotifier {
+class LoginController {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
@@ -21,7 +21,6 @@ class LoginController extends ChangeNotifier {
 
   Future<bool> login() async {
     isLoading = true;
-    notifyListeners();
 
     try {
       final user = await _loginUseCase(

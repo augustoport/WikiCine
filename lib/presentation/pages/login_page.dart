@@ -3,7 +3,7 @@ import 'package:cinerating/presentation/controllers/login_controller.dart';
 import 'package:cinerating/presentation/pages/home_page.dart';
 import 'package:cinerating/presentation/widgets/text_field_custom.dart';
 import 'package:cinerating/core/shared/themes/app_colors.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class LoginPage extends StatefulWidget {
@@ -20,14 +20,10 @@ class _LoginPageState extends State<LoginPage> {
   void initState() {
     super.initState();
     loginController.checkExistingSession();
-    loginController.addListener(() {
-      setState(() {});
-    });
   }
 
   @override
   void dispose() {
-    loginController.removeListener(() {});
     super.dispose();
   }
 

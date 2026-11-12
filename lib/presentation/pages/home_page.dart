@@ -7,7 +7,7 @@ import 'package:cinerating/presentation/controllers/login_controller.dart';
 import 'package:cinerating/presentation/bloc/home/home_cubit.dart';
 import 'package:cinerating/core/locator.dart';
 import 'package:cinerating/core/shared/themes/app_colors.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'login_page.dart';
@@ -24,7 +24,7 @@ class _HomePageState extends State<HomePage> {
   final homeController = getIt<HomeController>();
 
   @override
-  initState() {
+  void initState() {
     Future.microtask(() async {
       homeCubit.getMovies();
     });
@@ -32,8 +32,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
-  dispose() {
-    homeController.searchController.dispose();
+  void dispose() {
     super.dispose();
   }
 

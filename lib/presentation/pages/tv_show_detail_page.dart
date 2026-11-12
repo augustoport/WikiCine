@@ -2,7 +2,7 @@
 import 'package:cinerating/presentation/bloc/serie_detail/serie_cubit.dart';
 import 'package:cinerating/presentation/widgets/content_detail.dart';
 import 'package:cinerating/core/shared/themes/app_colors.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class TvShowDetailPage extends StatefulWidget {
