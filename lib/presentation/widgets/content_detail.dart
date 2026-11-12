@@ -83,6 +83,12 @@ class ContentDetail extends StatelessWidget {
                       child: Image.network(
                         fit: BoxFit.cover,
                         content.posterPath ?? "",
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.grey.shade400,
+                            child: Icon(Icons.image, size: 50),
+                          );
+                        },
                         loadingBuilder: (context, child, loadingProgress) {
                           if (loadingProgress == null) {
                             return child;
@@ -125,9 +131,9 @@ class ContentDetail extends StatelessWidget {
                       ),
                     ),
                     InkWell(
-                      onTap: () {
-                        
-                      },
+                      enableFeedback: false,
+                      splashColor: Colors.transparent,
+                      onTap: () {},
                       child: Icon(
                         isFavorite == true
                             ? Icons.favorite
