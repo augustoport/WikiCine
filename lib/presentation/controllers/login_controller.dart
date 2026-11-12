@@ -7,7 +7,7 @@ import '../../domain/usecases/user/get_current_user_usecase.dart';
 import '../../domain/usecases/auth/login_usecase.dart';
 import '../../domain/usecases/auth/logout_usecase.dart';
 
-class LoginController {
+class LoginController extends ChangeNotifier {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
@@ -21,6 +21,7 @@ class LoginController {
 
   Future<bool> login() async {
     isLoading = true;
+    notifyListeners();
 
     try {
       final user = await _loginUseCase(
