@@ -11,7 +11,7 @@
 >
 > Documentos relacionados: [`OBJETIVO_DO_SISTEMA.md`](./OBJETIVO_DO_SISTEMA.md) · READMEs locais em cada pasta de `lib/` e `test/` (índice na seção 12).
 >
-> O arquivo `ARCHITECTURE.md` na raiz é **anterior** a esta análise e está **desatualizado** (cita nomes de arquivos e pastas que não existem, como `auth_remote_datasource.dart` e `lib/shared/`, e afirma que os cubits de detalhe usam serviços legados, o que não é mais verdade). Em caso de divergência, este documento prevalece.
+> Este documento substitui o antigo `ARCHITECTURE.md` (removido por estar desatualizado).
 
 ---
 
@@ -231,7 +231,7 @@ Drawer "Profile" → ProfilePage → ProfileCubit.initProfile()
 | `AuthData`, `MovieData`, `TvData` | `registerLazySingleton` |
 | `AuthRepository`, `MovieRepository`, `TvRepository` | `registerLazySingleton` |
 | 11 casos de uso | `registerFactory` (não registra `GetUserFavoritesUsecases`) |
-| `LoginController` | `registerLazySingleton` (**o `ARCHITECTURE.md` antigo diz Factory**) |
+| `LoginController` | `registerLazySingleton` |
 | `HomeController` | `registerFactory` |
 | `HomeCubit`, `ProfileCubit`, `MovieCubit` | `registerFactory` (não registra `SerieCubit`) |
 

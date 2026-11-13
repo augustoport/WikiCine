@@ -3,7 +3,7 @@
 > Ref. global: [`ARQUITETURA_DO_SISTEMA.md`](../../../docs/ARQUITETURA_DO_SISTEMA.md) seção 7.3.
 
 ## Objetivo
-Implementação **anterior** à migração para Clean Architecture (fluxo `Views → Controllers → Services → API`, segundo o `ARCHITECTURE.md` antigo).
+Implementação **anterior** à migração para Clean Architecture (fluxo `Views → Controllers → Services → API`, conforme a documentação anterior do projeto).
 
 ## Responsabilidade principal
 Nenhuma no app atual. **Nenhum arquivo do projeto importa estas classes e elas não estão registradas no locator.** (Verificado por busca em `lib/`.)
@@ -35,5 +35,5 @@ Nenhum (código morto).
 - **[Órfão]** Recomenda-se remover a pasta inteira após portar a lógica de diretor para `data/`.
 - **[Débito]** Cria um `Dio` novo a cada chamada.
 - **[Débito]** Falhas retornam `null` silenciosamente.
-- O `ARCHITECTURE.md` antigo afirma que estes serviços são usados pelos cubits de detalhe — **isso não é mais verdade**.
+- Estes serviços **não** são mais usados pelos cubits de detalhe (que hoje usam casos de uso).
 - **Regra:** não adicionar código novo aqui.
