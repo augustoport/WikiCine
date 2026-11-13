@@ -10,7 +10,7 @@
 > - Trechos marcados com **Hipótese** são inferências não comprovadas pelo código.
 > - Problemas são classificados como **[Violação]**, **[Débito]**, **[Bug]**, **[Risco]** ou **[Órfão]**.
 >
-> Decisões de produto (`D1`–`D19`) e pendências (`P1`–`P4`) confirmadas pelo mantenedor estão em [`OBJETIVO_DO_SISTEMA.md` seção 8](./OBJETIVO_DO_SISTEMA.md#8-decisões-de-produto-entrevista-com-o-mantenedor-2026-11-13).
+> Decisões de produto (`D1`–`D33`) confirmadas pelo mantenedor estão em [`OBJETIVO_DO_SISTEMA.md` seção 8](./OBJETIVO_DO_SISTEMA.md#8-decisões-de-produto-entrevista-com-o-mantenedor-2026-11-13).
 >
 > Documentos relacionados: [`OBJETIVO_DO_SISTEMA.md`](./OBJETIVO_DO_SISTEMA.md) · READMEs locais em cada pasta de `lib/` e `test/` (índice na seção 12).
 >
@@ -351,6 +351,12 @@ Drawer "Profile" → ProfilePage → ProfileCubit.initProfile()
 11. **Chamadas de conta** (`/account/...`: favoritos, watchlist, avaliações) devem sempre enviar o `session_id` do usuário logado (impacto I1).
 12. **Idioma:** chamadas de catálogo e detalhe devem enviar `language` com o idioma da interface (D13, D14). Textos de UI devem vir de arquivos de tradução, não fixos no widget.
 13. **Nome do produto:** usar "WikiCine" em todo texto visível ao usuário (D1).
+14. **Proxy (D27):** `Environment` passa a conter só a URL base do proxy; `TOKEN` e `API_KEY` existem apenas como segredos da Cloud Function. Substitui a diretriz 6 para o app. O código do proxy fica fora de `lib/` (ex.: `functions/`).
+15. **Estado da conta (D29):** um repositório em memória (ex.: `AccountStateRepository`, `LazySingleton`) guarda favoritos, watchlist e avaliados; cubits o acessam via casos de uso; ele é limpo no logout e em sessão expirada.
+16. **Navegação (D30):** toda navegação via `go_router`; o guard central trata sessão, guest e rotas restritas. Substitui a diretriz 9.
+17. **Erros (D31):** datasources convertem `DioException` em falhas tipadas do domínio (ex.: `NetworkFailure`, `SessionExpiredFailure`, `NotFoundFailure`, `UnknownFailure`); cubits emitem `Error` com a falha, nunca com texto fixo.
+18. **Preferências (D26):** idioma e tema salvos com `shared_preferences`, chaves declaradas em `core/shared/storage_keys.dart`.
+19. **Avaliação (D23):** a conversão estrelas ↔ nota TMDB (×2) fica num único lugar do domínio, coberta por teste.
 
 ---
 
