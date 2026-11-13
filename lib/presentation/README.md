@@ -26,11 +26,11 @@ HomePage.Drawer ──Exit (pushReplacement)──► LoginPage
 ```
 
 ## Dependências
-- **Internas:** `core/locator.dart`, `core/shared/themes/app_colors.dart`, `domain/usecases/*`, `domain/entities/*`, `data/models/*` (violação).
+- **Internas:** `core/locator.dart` (só nas pages), `core/shared/{env,themes/app_colors}.dart`, `domain/usecases/*`, `domain/entities/*`. **Não importa `data/`** (R3) nem repositórios (R2).
 - **Externas:** `material_ui`, `bloc`, `flutter_bloc`, `cached_network_image`, `intl`, `url_launcher`.
 
 ## Módulos relacionados
-- `core/locator.dart` registra cubits e controllers (exceto `SerieCubit`).
+- `core/locator.dart` registra todos os cubits e controllers, injetando os casos de uso.
 
 ## Pontos de entrada
 `LoginPage` (home do `MaterialApp`).
@@ -42,7 +42,5 @@ Ver seções 6.2–6.8 da arquitetura.
 - `pages/home_page.dart`, `bloc/movie_detail/movie_cubit.dart`, `controllers/login_controller.dart`, `widgets/content_detail.dart`.
 
 ## Observações técnicas e débitos
-- **[Violação R2/R3]** Uso de `data/models` e de repositório direto.
-- **[Violação V4]** `getIt` resolvido dentro de cubits/controllers/pages.
 - **[Débito]** Não usa `BlocProvider`; cubits não são fechados (`close()`).
-- **[Débito]** Texto da UI misturando português e inglês; sem i18n.
+- **[Débito]** Textos da UI misturam português e inglês; sem i18n.

@@ -1,15 +1,15 @@
-import 'package:cinerating/data/models/movie_detail_model.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-import '../../../domain/entities/movie.dart';
-import '../../models/movie_simple_model.dart';
 import '../../../core/shared/env.dart';
+import '../../../domain/entities/credits.dart';
+import '../../../domain/entities/movie.dart';
+import '../../models/crew_model.dart';
+import '../../models/movie_detail_model.dart';
+import '../../models/movie_simple_model.dart';
 import '../data/movie_data.dart';
 
 class MovieImplementation implements MovieData {
   final Dio _dio = Dio();
-  final _storage = FlutterSecureStorage();
 
   MovieImplementation() {
     _dio.options.headers["Authorization"] =
@@ -20,15 +20,9 @@ class MovieImplementation implements MovieData {
   @override
   Future<List<Movie>> getMovies() async {
     final response = await _dio.get('/discover/movie');
-
-    List<Movie> movieList = [];
-
-    for (var m in (response.data['results'] as List)) {
-      Movie movie = MovieSimpleModel.fromMap(m);
-      movieList.add(movie);
-    }
-
-    return movieList;
+    return (response.data['results'] as List)
+        .map((m) => MovieSimpleModel.fromMap(m))
+        .toList();
   }
 
   @override
@@ -37,49 +31,33 @@ class MovieImplementation implements MovieData {
       '/search/movie',
       queryParameters: {'query': query, 'language': 'en-US;pt-BR'},
     );
-
-    List<Movie> movieList = [];
-
-    for (var m in (response.data['results'] as List)) {
-      Movie movie = MovieSimpleModel.fromMap(m);
-      movieList.add(movie);
-    }
-
-    return movieList;
+    return (response.data['results'] as List)
+        .map((m) => MovieSimpleModel.fromMap(m))
+        .toList();
   }
 
   @override
   Future<Movie> getMovieDetails(String movieId) async {
     final response = await _dio.get('/movie/$movieId');
-    Movie model = MovieDetailModel.fromMap(response.data);
-    return model;
+    return MovieDetailModel.fromMap(response.data);
   }
 
   @override
-  Future<dynamic> getMovieCrew(String movieId) async {
+  Future<Credits> getMovieCredits(String movieId) async {
     final response = await _dio.get('/movie/$movieId/credits');
-    return response.data;
-  }
 
-  @override
-  Future<dynamic> getMovieDetailsFull(String movieId) async {
-    final response = await _dio.get('/movie/$movieId');
-    return response.data;
-  }
+    final cast = (response.data['cast'] as List? ?? [])
+        .map((c) => CrewModel.fromMap(c).toEntity())
+        .toList();
 
-  @override
-  Future<List<Movie>> getFavoriteMovies() async {
-    final id = await _storage.read(key: 'account_id');
-    final response = await _dio.get('/account/$id/favorite/movies');
+    final crew = (response.data['crew'] as List? ?? [])
+        .map((c) => CrewModel.fromMap(c).toEntity());
 
-    List<Movie> movieList = [];
+    final directors = crew.where((c) => c.job == 'Director');
 
-    for (var m in (response.data['results'] as List)) {
-      final movie = MovieDetailModel.fromMap(m);
-      movieList.add(movie);
-    }
-
-    
-    return movieList;
+    return Credits(
+      cast: cast,
+      director: directors.isEmpty ? null : directors.first,
+    );
   }
 }

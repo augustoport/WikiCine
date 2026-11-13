@@ -1,13 +1,14 @@
 import 'dart:convert';
 
 import '../../core/shared/env.dart';
+import '../../domain/entities/genre.dart';
 import '../../domain/entities/movie.dart';
+import 'genre_model.dart';
 
 class MovieDetailModel extends Movie {
   bool? adult;
   BelongsToCollection? belongsToCollection;
   int? budget;
-  List<Genre>? genres;
   String? homepage;
   String? imdbId;
   List<String>? originCountry;
@@ -20,7 +21,6 @@ class MovieDetailModel extends Movie {
   String? status;
   String? tagline;
   bool? video;
-  int? voteCount;
 
   MovieDetailModel({
     super.backdropPath,
@@ -34,7 +34,7 @@ class MovieDetailModel extends Movie {
     this.adult,
     this.belongsToCollection,
     this.budget,
-    this.genres,
+    super.genres,
     this.homepage,
     this.imdbId,
     this.originCountry,
@@ -47,7 +47,7 @@ class MovieDetailModel extends Movie {
     this.status,
     this.tagline,
     this.video,
-    this.voteCount,
+    super.voteCount,
   });
 
   MovieDetailModel copyWith({
@@ -121,7 +121,9 @@ class MovieDetailModel extends Movie {
         budget: json["budget"],
         genres: json["genres"] == null
             ? []
-            : List<Genre>.from(json["genres"]!.map((x) => Genre.fromMap(x))),
+            : List<GenreModel>.from(
+                json["genres"]!.map((x) => GenreModel.fromMap(x)),
+              ),
         homepage: json["homepage"],
         id: json["id"],
         imdbId: json["imdb_id"],
@@ -169,7 +171,7 @@ class MovieDetailModel extends Movie {
     "budget": budget,
     "genres": genres == null
         ? []
-        : List<dynamic>.from(genres!.map((x) => x.toMap())),
+        : List<dynamic>.from(genres!.map(GenreModel.toMap)),
     "homepage": homepage,
     "id": id,
     "imdb_id": imdbId,
@@ -241,24 +243,6 @@ class BelongsToCollection {
   };
 }
 
-class Genre {
-  int? id;
-  String? name;
-
-  Genre({this.id, this.name});
-
-  Genre copyWith({int? id, String? name}) =>
-      Genre(id: id ?? this.id, name: name ?? this.name);
-
-  factory Genre.fromJson(String str) => Genre.fromMap(json.decode(str));
-
-  String toJson() => json.encode(toMap());
-
-  factory Genre.fromMap(Map<String, dynamic> json) =>
-      Genre(id: json["id"], name: json["name"]);
-
-  Map<String, dynamic> toMap() => {"id": id, "name": name};
-}
 
 class ProductionCompany {
   int? id;

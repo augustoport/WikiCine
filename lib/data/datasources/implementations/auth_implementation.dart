@@ -1,18 +1,17 @@
-import 'package:cinerating/data/repositories/movie_api.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../../domain/entities/user.dart';
 import '../../../core/shared/env.dart';
+import '../../../core/shared/storage_keys.dart';
 import '../../models/user_model.dart';
 import '../data/auth_data.dart';
-import 'movie_implementation.dart';
 
 class AuthImplementation implements AuthData {
   final Dio _dio;
   final FlutterSecureStorage _storage;
 
-  AuthImplementation()
+  AuthImplementation(this._storage)
     : _dio = Dio(
         BaseOptions(
           baseUrl: Environment.production.baseUrl,
@@ -22,8 +21,7 @@ class AuthImplementation implements AuthData {
             'Accept': 'application/json',
           },
         ),
-      ),
-      _storage = const FlutterSecureStorage();
+      );
 
   @override
   Future<User> login({
@@ -40,7 +38,7 @@ class AuthImplementation implements AuthData {
 
     final sessionId = await createSession(validatedToken);
 
-    await _storage.write(key: 'tmdb_session_id', value: sessionId);
+    await _storage.write(key: StorageKeys.sessionId, value: sessionId);
 
     return await getAccountDetails(sessionId);
   }
@@ -53,17 +51,9 @@ class AuthImplementation implements AuthData {
     );
 
     final accountId = response.data['id']?.toString() ?? '';
-    await _storage.write(key: 'account_id', value: accountId);
+    await _storage.write(key: StorageKeys.accountId, value: accountId);
 
-    final favoriteMovies = await MovieApi(
-      MovieImplementation(),
-    ).getFavoriteMovies();
-
-    User user = UserModel.fromJson(response.data, sessionId);
-
-    user.favoriteMovies = favoriteMovies;
-
-    return user;
+    return UserModel.fromJson(response.data, sessionId);
   }
 
   Future<String> createRequestToken() async {

@@ -1,22 +1,21 @@
-import 'package:cinerating/core/locator.dart';
-import 'package:cinerating/data/models/crew_model.dart';
 import 'package:cinerating/presentation/widgets/cast_card.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/shared/themes/app_colors.dart';
+import '../../domain/entities/credits.dart';
 
 class ContentDetail extends StatelessWidget {
   final dynamic content;
-  final dynamic cast;
-  final dynamic director;
+  final List<CastMember> cast;
+  final CastMember? director;
   final String type;
   final bool? isFavorite;
   const ContentDetail({
     super.key,
     required this.content,
     required this.type,
-    this.cast,
+    this.cast = const [],
     this.director,
     this.isFavorite = false,
   });
@@ -249,8 +248,8 @@ class ContentDetail extends StatelessWidget {
 }
 
 class ContentCreditWidget extends StatelessWidget {
-  final dynamic cast;
-  final dynamic director;
+  final List<CastMember> cast;
+  final CastMember? director;
   const ContentCreditWidget(this.cast, this.director, {super.key});
 
   @override
@@ -274,16 +273,13 @@ class ContentCreditWidget extends StatelessWidget {
               final actor = cast[i];
               return Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: CastCard(
-                  actor,
-                  roles: actor is CrewModel ? [] : actor.roles,
-                ),
+                child: CastCard(actor),
               );
             }),
           ),
         ),
         SizedBox(height: 15),
-        if (director != null && director.name != "N/A")
+        if (director != null)
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: .end,
@@ -301,9 +297,9 @@ class ContentCreditWidget extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: .start,
                   children: [
-                    if (director.profilePath != null) ...[
+                    if (director!.profilePath != null) ...[
                       Image.network(
-                        director.profilePath ?? "",
+                        director!.profilePath!,
                         height: 80,
                         width: 50,
                         fit: BoxFit.cover,
@@ -321,7 +317,7 @@ class ContentCreditWidget extends StatelessWidget {
                     ],
                     SizedBox(height: 5),
                     Text(
-                      director.name ?? "N/A",
+                      director!.name ?? "N/A",
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 12,

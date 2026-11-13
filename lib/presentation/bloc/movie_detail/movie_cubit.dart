@@ -1,50 +1,45 @@
 import 'package:bloc/bloc.dart';
-import 'package:cinerating/domain/entities/movie.dart';
 
-import '../../../core/locator.dart';
-import '../../../data/models/crew_model.dart';
-import '../../../data/models/movie_detail_model.dart';
+import '../../../domain/entities/credits.dart';
+import '../../../domain/entities/movie.dart';
 import '../../../domain/usecases/movies/get_movie_crew_usecase.dart';
 import '../../../domain/usecases/movies/get_movie_details_usecase.dart';
-import '../../../domain/usecases/user/get_current_user_usecase.dart';
+import '../../../domain/usecases/user/get_user_favorites_usecase.dart';
 
 part 'movie_states.dart';
 
 class MovieCubit extends Cubit<MovieStates> {
-  MovieCubit() : super(MovieInitial());
-  final _getMovieDetailsUseCase = getIt<GetMovieDetailsUseCase>();
-  final _getMovieCrewUseCase = getIt<GetMovieCrewUseCase>();
-  final _getCurrentUser = getIt<GetCurrentUserUseCase>();
+  MovieCubit({
+    required GetMovieDetailsUseCase getMovieDetailsUseCase,
+    required GetMovieCrewUseCase getMovieCrewUseCase,
+    required GetUserFavoritesUseCase getUserFavoritesUseCase,
+  }) : _getMovieDetailsUseCase = getMovieDetailsUseCase,
+       _getMovieCrewUseCase = getMovieCrewUseCase,
+       _getUserFavoritesUseCase = getUserFavoritesUseCase,
+       super(MovieInitial());
 
-  Future<void> filterCrew(
-    List<CrewModel> crew,
-    MovieDetailModel movieDetail,
-  ) async {
-    final cast = crew.where((c) => c.knownForDepartment == "Acting").toList();
-    final director = crew.firstWhere(
-      (c) => c.job == "Director",
-      orElse: () => CrewModel(name: "N/A", job: "Director"),
-    );
-
-    final user = await _getCurrentUser();
-
-    final favorite = user?.favoriteMovies?.any((movie) => movie?.id == movieDetail.id);
-
-    emit(MovieSuccess(movieDetail, cast, director, favorite ?? false));
-  }
+  final GetMovieDetailsUseCase _getMovieDetailsUseCase;
+  final GetMovieCrewUseCase _getMovieCrewUseCase;
+  final GetUserFavoritesUseCase _getUserFavoritesUseCase;
 
   Future<void> getMovieDetails(String movieId) async {
     emit(MovieLoading());
     try {
-      final movieDetail = await _getMovieDetailsUseCase(movieId);
-      final crew = await _getMovieCrewUseCase(movieId);
-      final movieDetailModel = MovieDetailModel.fromMap(movieDetail);
-      final crewList = (crew['cast'] as List)
-          .map((c) => CrewModel.fromMap(c))
-          .toList();
-      filterCrew(crewList, movieDetailModel);
+      final movie = await _getMovieDetailsUseCase(movieId);
+      final credits = await _getMovieCrewUseCase(movieId);
+      final isFavorite = await _isFavorite(movie);
+      emit(MovieSuccess(movie, credits.cast, credits.director, isFavorite));
     } catch (e) {
       emit(MovieError());
+    }
+  }
+
+  Future<bool> _isFavorite(Movie movie) async {
+    try {
+      final favorites = await _getUserFavoritesUseCase();
+      return favorites.any((f) => f.id == movie.id);
+    } catch (_) {
+      return false;
     }
   }
 }

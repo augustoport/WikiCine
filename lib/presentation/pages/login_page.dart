@@ -1,4 +1,5 @@
 import 'package:cinerating/core/locator.dart';
+import 'package:cinerating/core/shared/env.dart';
 import 'package:cinerating/presentation/controllers/login_controller.dart';
 import 'package:cinerating/presentation/pages/home_page.dart';
 import 'package:cinerating/presentation/widgets/text_field_custom.dart';
@@ -59,7 +60,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _openTmdbSignup() async {
-    final Uri url = Uri.parse('https://www.themoviedb.org/signup');
+    final Uri url = Uri.parse(Environment.production.signupUrl);
     if (await canLaunchUrl(url)) {
       await launchUrl(url);
     }

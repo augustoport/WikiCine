@@ -3,6 +3,7 @@
 > **Documento oficial de arquitetura.** Base para desenvolvimento no modelo *Spec-Driven Development*.
 > Gerado a partir da análise do código em `lib/`, `test/`, `pubspec.yaml`, configurações de plataforma e Firebase.
 > Data da análise: 2026-11-13 · commit de referência: `cd8a2ee`.
+> **Atualização (2026-11-13):** refatoração para cumprir as regras R2–R9 (seção 3). Itens resolvidos estão marcados com ✅ **Resolvido**.
 >
 > **Convenção de leitura**
 > - Afirmações sem marcação foram **verificadas no código** (com referência `arquivo:linha` quando relevante).
@@ -33,19 +34,16 @@ lib/
 ### 1.1 Diagrama de dependências entre camadas (estado real)
 
 ```
-                  ┌──────────────────────── core/locator.dart (composition root) ───────────────────────┐
+                  ┌──────────────────────── core/locator.dart (composition root) ─────────────────────────┐
                   │   importa e registra: data/*, domain/*, presentation/bloc/*, presentation/controllers/* │
-                  └──────────────────────────────────────────────────────────────────────────────────────┘
-                                   ▲ getIt<T>() é chamado de dentro de cubits, controllers e pages
+                  │   injeta dependências pelo construtor de cubits, controllers, repositórios e datasources │
+                  └──────────────────────────────────────────────────────────────────────────────────────────┘
+                                   ▲ getIt<T>() só é chamado no locator e nas pages (para obter cubits/controllers)
 
  presentation ──► domain/usecases ──► domain/repositories (abstrações) ◄── data/repositories ──► data/datasources ──► TMDB (HTTP)
-      │                                                                                             │
-      │ [Violação] importa data/models diretamente                                                  │ [Violação] AuthImplementation
-      └────────────────────────────► data/models ◄──────────────────────────────────────────────────┘  instancia MovieApi(MovieImplementation())
-
- data/models ──► domain/entities (models estendem entidades)
- data/*, data/models ──► core/shared/env.dart (URLs e tokens)
- core/services/* ──► data/models, core/shared/env.dart     [Órfão] ninguém importa core/services
+      │                                       ▲                                                         │
+      └──► domain/entities ◄──────────────────┴──── data/models (estendem entidades / toEntity()) ◄─────┘
+ data/*, presentation/pages/login_page.dart ──► core/shared (env.dart, storage_keys.dart, themes/)
 ```
 
 ### 1.2 Pilha tecnológica (fonte: `pubspec.yaml` / `pubspec.lock`)
@@ -72,15 +70,15 @@ lib/
 | Padrão | Onde | Observação |
 |---|---|---|
 | **Clean Architecture** (domain / data / presentation) | Estrutura de `lib/` | Aplicada parcialmente — ver seção 7. |
-| **Repository** | `domain/repositories/*` (contratos) e `data/repositories/*` (impl.) | Implementações são *pass-through* para o datasource. |
+| **Repository** | `domain/repositories/*` (contratos) e `data/repositories/*` (impl.) | Implementações são *pass-through* para o datasource. Contratos 100% tipados. |
 | **Datasource** (interface + implementação) | `data/datasources/data/*` (interfaces) e `data/datasources/implementations/*` | Toda fonte é remota (HTTP). |
-| **Use Case** (classe com `call()`) | `domain/usecases/**` | Um caso de uso por operação; todos apenas delegam ao repositório. |
-| **DTO herdando entidade** | `MovieSimpleModel`, `MovieDetailModel` → `Movie`; `TvShowModel` → `TvShow`; `UserModel` → `User` | Models *são* entidades (herança), sem mapeamento explícito. |
-| **Service Locator** (`get_it`) | `core/locator.dart` | Resolução feita **dentro** das classes (`getIt<T>()`), não por injeção no construtor. |
+| **Use Case** (classe com `call()`) | `domain/usecases/**` | Um caso de uso por operação; quase todos apenas delegam (`GetMovieCrewUseCase` filtra o elenco por "Acting"). |
+| **DTO herdando entidade** | `MovieSimpleModel`, `MovieDetailModel` → `Movie`; `TvShowModel` → `TvShow`; `UserModel` → `User`; `GenreModel` → `Genre` | Models *são* entidades (herança). Créditos usam mapeamento explícito `toEntity()` (`CrewModel`, `Cast`, `TvShowCrew` → `CastMember`/`Credits`). |
+| **Service Locator** (`get_it`) + injeção por construtor | `core/locator.dart` | O locator monta o grafo e injeta as dependências pelo construtor. As pages obtêm cubits/controllers via `getIt<T>()`. |
 | **Cubit + estados por herança** | `presentation/bloc/**` | Estados como classes simples (sem `Equatable`). Uso de `part`/`part of` em home, movie_detail, serie_detail. |
 | **ChangeNotifier controller** | `LoginController` | Estado de login/sessão consumido via `ListenableBuilder`. |
 | **Enum de ambiente** | `core/shared/env.dart` | Valores injetados com `--dart-define` (`TOKEN`, `API_KEY`). |
-| **Navegação imperativa** | `Navigator.push/pushReplacement` + `MaterialPageRoute` | Não há rotas nomeadas; `core/shared/routes.dart` está vazio. |
+| **Navegação imperativa** | `Navigator.push/pushReplacement` + `MaterialPageRoute` | Não há rotas nomeadas. |
 
 ---
 
@@ -90,15 +88,15 @@ As regras abaixo descrevem o **contrato desejado**. A coluna "Status" indica a a
 
 | # | Regra | Status atual |
 |---|---|---|
-| R1 | `domain/` não importa `data/`, `presentation/`, `core/` nem pacotes de infraestrutura (Dio, storage, Flutter). | ✅ Cumprida. `domain/` só importa a si mesmo. |
-| R2 | `presentation/` acessa dados **somente via casos de uso** do `domain/`. | ✅ Cumprida. `ProfileCubit` passou a usar `GetUserFavoritesUsecases` (`profile_cubit.dart:10`). |
-| R3 | `presentation/` não importa `data/`. | ❌ `MovieCubit`, `SerieCubit`, `movie_states.dart`, `serie_state.dart` e `ContentDetail` importam `data/models/*`. |
-| R4 | Contratos de domínio retornam **entidades tipadas**, nunca `dynamic`/JSON cru. | ❌ `getMovieCrew`, `getMovieDetailsFull`, `getTvShowCrew`, `getTvShowDetailsFull` retornam `Future<dynamic>` (JSON). |
-| R5 | Um datasource não depende de repositórios nem de outros datasources; composição é feita no locator. | ❌ `AuthImplementation.getAccountDetails` faz `MovieApi(MovieImplementation())` (`auth_implementation.dart:58`). |
-| R6 | Toda dependência é registrada em `core/locator.dart`. | ❌ `SerieCubit` é instanciado com `SerieCubit()` em `tv_show_detail_page.dart:17`; `UserRepository` não é registrado. |
-| R7 | Somente `core/shared/env.dart` conhece URLs, tokens e chaves. | ✅ Cumprida (com exceção do link de cadastro TMDB em `login_page.dart:62`). |
-| R8 | Segredos não são versionados. | ❌ `.vscode/launch.json` (versionado apesar de constar no `.gitignore`) contém `API_KEY` e `TOKEN` reais. |
-| R9 | Todo código em `lib/` é alcançável a partir de `main.dart`. | ❌ Ver módulos órfãos (seção 7.3). |
+| R1 | `domain/` não importa `data/`, `presentation/`, `core/` nem pacotes de infraestrutura (Dio, storage, Flutter). | ✅ Cumprida. |
+| R2 | `presentation/` acessa dados **somente via casos de uso** do `domain/`. | ✅ **Resolvido.** `ProfileCubit` usa `GetUserFavoritesUseCase`. |
+| R3 | `presentation/` não importa `data/`. | ✅ **Resolvido.** Cubits, estados e widgets usam apenas entidades (`Movie`, `TvShow`, `Credits`, `CastMember`, `Genre`). |
+| R4 | Contratos de domínio retornam **entidades tipadas**, nunca `dynamic`/JSON cru. | ✅ **Resolvido.** `getMovieCredits`/`getTvShowCredits` retornam `Credits`; detalhes usam `getMovieDetails`/`getTvShowDetails` tipados. Métodos `...Full` e `getMovieCrew`/`getTvShowCrew` (dynamic) foram removidos. |
+| R5 | Um datasource não depende de repositórios nem de outros datasources; composição é feita no locator. | ✅ **Resolvido.** `AuthImplementation` não busca mais favoritos; favoritos ficaram em `UserData`/`UserImplementation`. |
+| R6 | Toda dependência é registrada em `core/locator.dart`. | ✅ **Resolvido.** `SerieCubit`, `UserData`, `UserRepository`, `GetUserFavoritesUseCase` e `FlutterSecureStorage` registrados. |
+| R7 | Somente `core/shared/env.dart` conhece URLs, tokens e chaves. | ✅ **Resolvido.** URL de cadastro movida para `Environment.signupUrl`. |
+| R8 | Segredos não são versionados. | ✅ **Resolvido no estado atual** (`.vscode/launch.json` removido do índice; continua local e ignorado). ⚠️ As credenciais **permanecem no histórico do Git** e devem ser revogadas/rotacionadas no TMDB. |
+| R9 | Todo código em `lib/` é alcançável a partir de `main.dart`. | ✅ **Resolvido.** Removidos `core/services/`, `routes.dart`, `HomePeople`; `UserRepository` agora é implementado e usado; registro sem uso de `AppColors` removido. |
 
 ---
 
@@ -110,6 +108,7 @@ As regras abaixo descrevem o **contrato desejado**. A coluna "Status" indica a a
 - **Classes de caso de uso:** `XxxUseCase` com método `call(...)`.
 - **Datasources:** interface `XxxData` em `datasources/data/`, implementação `XxxImplementation` em `datasources/implementations/`.
 - **Models:** `XxxModel` com `fromMap`, `toMap`, `fromJson(String)`, `toJson()`, `copyWith` (estilo gerado por *quicktype*; **Hipótese** sobre a origem).
+- **Chaves de storage:** centralizadas em `core/shared/storage_keys.dart` (`StorageKeys.sessionId`, `StorageKeys.accountId`).
 - **URLs de imagem:** os models concatenam `Environment.production.mediaUrl` (`.../t/p/w400`) ao `*_path` no `fromMap`. Exceções: `BelongsToCollection`, `ProductionCompany`, `CreatedBy`, `Season`, `Network`, `LastEpisodeToAir` mantêm o path cru.
 - **Estados de Cubit:** `XxxInitial`, `XxxLoading`, `XxxSuccess`/dados, `XxxError`.
 - **Mensagens de UI:** mistura de português ("Pesquisar", "Preencha todos os campos") e inglês ("Profile", "Settings", "Exit", "Genres:", "Cast:").
@@ -121,9 +120,8 @@ As regras abaixo descrevem o **contrato desejado**. A coluna "Status" indica a a
 | Repositórios | `AuthApi`, `MovieApi` vs `TvRepositoryImpl` (arquivo `tv_api.dart`). |
 | Séries | `tv_show` (domain/usecases, pages) vs `serie_detail`/`SerieCubit`/`SerieState` (bloc). |
 | Estados | `home_states.dart`/`movie_states.dart`/`profile_states.dart` (plural) vs `serie_state.dart` (singular). |
-| Caso de uso | `get_user_favorites_usecases.dart` / `GetUserFavoritesUsecases` (plural, "cases" minúsculo). |
 | Pasta de interfaces | `datasources/data/` (nome ambíguo com a camada `data/`). |
-| Classes duplicadas | `Genre` e `ProductionCountry` existem em `movie_detail_model.dart` **e** em `tv_show_model.dart` (conflito se ambos forem importados no mesmo arquivo). |
+| Classes duplicadas | `ProductionCountry` existe em `movie_detail_model.dart` **e** em `tv_show_model.dart` (conflito se ambos forem importados no mesmo arquivo). `Genre` foi unificado em `genre_model.dart` (`GenreModel`). |
 
 ---
 
@@ -132,15 +130,14 @@ As regras abaixo descrevem o **contrato desejado**. A coluna "Status" indica a a
 | Camada / módulo | Responsabilidade | README local |
 |---|---|---|
 | `lib/main.dart` | Inicializa o locator e monta `MaterialApp` com `LoginPage` como home. | [`lib/README.md`](../lib/README.md) |
-| `core/locator.dart` | *Composition root*: registra datasources, repositórios, casos de uso, controllers e cubits. | [`lib/core/README.md`](../lib/core/README.md) |
-| `core/shared/` | Ambiente (`Environment`), cores (`AppColors`), rotas (vazio). | [`lib/core/shared/README.md`](../lib/core/shared/README.md) |
-| `core/services/` | Serviços HTTP legados (pré-migração). **Órfãos.** | [`lib/core/services/README.md`](../lib/core/services/README.md) |
-| `domain/entities/` | `Movie`, `TvShow`, `User`, `Avatar`. | [`lib/domain/entities/README.md`](../lib/domain/entities/README.md) |
+| `core/locator.dart` | *Composition root*: registra e injeta datasources, repositórios, casos de uso, controllers e cubits. | [`lib/core/README.md`](../lib/core/README.md) |
+| `core/shared/` | Ambiente (`Environment`), chaves de storage (`StorageKeys`), cores (`AppColors`). | [`lib/core/shared/README.md`](../lib/core/shared/README.md) |
+| `domain/entities/` | `Movie`, `TvShow`, `User`, `Avatar`, `Genre`, `Credits`, `CastMember`. | [`lib/domain/entities/README.md`](../lib/domain/entities/README.md) |
 | `domain/repositories/` | Contratos `AuthRepository`, `MovieRepository`, `TvRepository`, `UserRepository`. | [`lib/domain/repositories/README.md`](../lib/domain/repositories/README.md) |
-| `domain/usecases/` | 13 casos de uso (auth, movies, tv_show, user). | [`lib/domain/usecases/README.md`](../lib/domain/usecases/README.md) |
+| `domain/usecases/` | 12 casos de uso (auth, movies, tv_show, user). | [`lib/domain/usecases/README.md`](../lib/domain/usecases/README.md) |
 | `data/datasources/` | Chamadas HTTP ao TMDB e acesso ao secure storage. | [`lib/data/datasources/README.md`](../lib/data/datasources/README.md) |
 | `data/models/` | DTOs com (de)serialização JSON. | [`lib/data/models/README.md`](../lib/data/models/README.md) |
-| `data/repositories/` | Implementações dos contratos de domínio. | [`lib/data/repositories/README.md`](../lib/data/repositories/README.md) |
+| `data/repositories/` | Implementações dos contratos de domínio (`AuthApi`, `MovieApi`, `TvRepositoryImpl`, `UserApi`). | [`lib/data/repositories/README.md`](../lib/data/repositories/README.md) |
 | `presentation/bloc/` | Estado das telas Home, Detalhe de filme, Detalhe de série, Perfil. | [`lib/presentation/bloc/README.md`](../lib/presentation/bloc/README.md) |
 | `presentation/controllers/` | `LoginController` (sessão) e `HomeController` (busca). | [`lib/presentation/controllers/README.md`](../lib/presentation/controllers/README.md) |
 | `presentation/pages/` | 5 telas: Login, Home (+Drawer), Detalhe de filme, Detalhe de série, Perfil. | [`lib/presentation/pages/README.md`](../lib/presentation/pages/README.md) |
@@ -167,19 +164,17 @@ LoginPage._handleLogin
                       1. GET  /authentication/token/new                 (?api_key)
                       2. POST /authentication/token/validate_with_login (?api_key, body: username/password/request_token)
                       3. POST /authentication/session/new               (?api_key, body: request_token)
-                      4. secure_storage.write('tmdb_session_id')
+                      4. secure_storage.write(StorageKeys.sessionId)
                       5. getAccountDetails(sessionId):
                            GET /account?session_id=…
-                           secure_storage.write('account_id')
-                           MovieApi(MovieImplementation()).getFavoriteMovies()   ← [Violação R5]
-                             GET /account/{account_id}/favorite/movies
-                      → User (UserModel) com favoriteMovies
+                           secure_storage.write(StorageKeys.accountId)
+                      → User (UserModel)
   └─ sucesso → Navigator.pushReplacement(HomePage)
 ```
 Todas as requisições também enviam `Authorization: Bearer <TOKEN>` (token de aplicação, não do usuário).
 
 ### 6.3 Sessão existente
-- `LoginPage.initState` e `DrawerWidget.initState` chamam `LoginController.checkExistingSession()` → `GetCurrentUserUseCase` → `AuthApi.getCurrentUser` (lê `tmdb_session_id`; se existir, refaz `getAccountDetails`, incluindo favoritos).
+- `LoginPage.initState` e `DrawerWidget.initState` chamam `LoginController.checkExistingSession()` → `GetCurrentUserUseCase` → `AuthApi.getCurrentUser` (lê a sessão; se existir, refaz `getAccountDetails`).
 - **Observação:** a `LoginPage` **não redireciona** para a Home quando há sessão; apenas popula `currentUser`.
 
 ### 6.4 Home (listagem e busca)
@@ -194,44 +189,44 @@ ContentList (grid) → tap → MovieDetailPage(movieId) | TvShowDetailPage(id)
 
 ### 6.5 Detalhe de filme
 ```
-MovieDetailPage → MovieCubit.getMovieDetails(id)
-   GetMovieDetailsUseCase → repo.getMovieDetailsFull → GET /movie/{id}           (JSON cru)
-   GetMovieCrewUseCase    → repo.getMovieCrew        → GET /movie/{id}/credits   (JSON cru)
-   MovieDetailModel.fromMap(json); CrewModel.fromMap(cast[i])                     ← parsing na apresentação [Violação R3/R4]
-   filterCrew: elenco = knownForDepartment == "Acting"; diretor = job == "Director"
-   GetCurrentUserUseCase → (GET /account + GET favorites) → isFavorite
-   emit MovieSuccess → ContentDetail(type: "movie")
+MovieDetailPage → getIt<MovieCubit>() → getMovieDetails(id)
+   GetMovieDetailsUseCase → MovieRepository.getMovieDetails → GET /movie/{id}          → Movie (MovieDetailModel)
+   GetMovieCrewUseCase    → MovieRepository.getMovieCredits → GET /movie/{id}/credits  → Credits
+        data: cast = credits.cast; director = 1º membro de credits.crew com job == "Director"
+        domínio: cast filtrado por department == "Acting"
+   GetUserFavoritesUseCase → UserRepository → GET /account/{account_id}/favorite/movies → isFavorite (false em erro)
+   emit MovieSuccess(movie, cast, director?, isFavorite) → ContentDetail(type: "movie")
 ```
 
 ### 6.6 Detalhe de série
 ```
-TvShowDetailPage → SerieCubit() (instanciado direto)
-   GetTvShowDetailsUseCase → GET /tv/{id}                    (JSON cru) → TvShowModel.fromMap
-   GetTvShowCrewUseCase    → GET /tv/{id}/aggregate_credits  (JSON cru) → TvShowCrew.fromMap
+TvShowDetailPage → getIt<SerieCubit>() → getSerieDetail(id)
+   GetTvShowDetailsUseCase → TvRepository.getTvShowDetails → GET /tv/{id}                    → TvShow (TvShowModel)
+   GetTvShowCrewUseCase    → TvRepository.getTvShowCredits → GET /tv/{id}/aggregate_credits  → Credits (personagem = roles[0])
    emit SerieSuccess(tvShow, cast) → ContentDetail(type: "tv")
 ```
 
 ### 6.7 Perfil
 ```
 Drawer "Profile" → ProfilePage → ProfileCubit.initProfile()
-   GetUserFavoritesUsecases → MovieRepository.getFavoriteMovies() → GET /account/{account_id}/favorite/movies
+   GetUserFavoritesUseCase → UserRepository → UserImplementation → GET /account/{account_id}/favorite/movies
    emit ProfileSuccess(favorites, watchlist: [])  → lista horizontal → tap → MovieDetailPage
    Cabeçalho usa LoginController.currentUser (singleton).
 ```
 
 ### 6.8 Logout
-`DrawerWidget._handleLogout` → `LoginController.logout()` → `LogoutUseCase` → `AuthApi.logout` (apaga **apenas** `tmdb_session_id`) → `pushReplacement(LoginPage)`.
+`DrawerWidget._handleLogout` → `LoginController.logout()` → `LogoutUseCase` → `AuthApi.logout` (apaga `StorageKeys.sessionId` e `StorageKeys.accountId`) → `pushReplacement(LoginPage)`.
 
 ### 6.9 Ciclo de vida no locator (`core/locator.dart`)
 | Tipo | Registro |
 |---|---|
-| `AppColors` | `registerSingleton` (mas todos os campos são `static`) |
-| `AuthData`, `MovieData`, `TvData` | `registerLazySingleton` |
-| `AuthRepository`, `MovieRepository`, `TvRepository` | `registerLazySingleton` |
-| 12 casos de uso (incl. `GetUserFavoritesUsecases`) | `registerFactory` |
-| `LoginController` | `registerLazySingleton` |
+| `FlutterSecureStorage` | `registerLazySingleton` (compartilhado por `AuthImplementation`, `UserImplementation`, `AuthApi`) |
+| `AuthData`, `MovieData`, `TvData`, `UserData` | `registerLazySingleton` |
+| `AuthRepository`, `MovieRepository`, `TvRepository`, `UserRepository` | `registerLazySingleton` |
+| 12 casos de uso | `registerFactory` |
+| `LoginController` | `registerLazySingleton` (casos de uso injetados no construtor) |
 | `HomeController` | `registerFactory` |
-| `HomeCubit`, `ProfileCubit`, `MovieCubit` | `registerFactory` (não registra `SerieCubit`) |
+| `HomeCubit`, `MovieCubit`, `SerieCubit`, `ProfileCubit` | `registerFactory` (casos de uso injetados no construtor) |
 
 ---
 
@@ -240,49 +235,46 @@ Drawer "Profile" → ProfilePage → ProfileCubit.initProfile()
 ### 7.1 Bugs identificados no código
 | ID | Descrição | Evidência |
 |---|---|---|
-| B1 | **Diretor do filme nunca é exibido.** `MovieCubit` monta `crewList` apenas a partir de `crew['cast']`; entradas de elenco não têm `job == "Director"`, então `filterCrew` sempre cai no `orElse` (`name: "N/A"`) e `ContentCreditWidget` oculta o bloco. O serviço legado incluía a equipe (`crew`) filtrando "Director". | `movie_cubit.dart:42-45`, `:24-27`; `content_detail.dart:286` |
-| B2 | **Menu "Settings" do Drawer não tem efeito visível.** Faz `getIt<HomeCubit>()`, mas `HomeCubit` é `registerFactory`: cria uma nova instância, diferente da usada pela `HomePage`. | `home_page.dart:255-259`; `locator.dart:116` |
+| B1 | ✅ **Resolvido.** O diretor do filme não era exibido porque só o `cast` era lido. Agora `MovieImplementation.getMovieCredits` busca o diretor em `crew`. | `movie_implementation.dart` |
+| B2 | **Menu "Settings" do Drawer não tem efeito visível.** Faz `getIt<HomeCubit>()`, mas `HomeCubit` é `registerFactory`: cria uma nova instância, diferente da usada pela `HomePage`. | `home_page.dart:255-259`; `locator.dart:110` |
 | B3 | **Possível exceção ao renderizar filme sem data.** `DateFormat.format` recebe `content.releaseDate` (pode ser `null`) quando `type == "movie"`; o `?? DateTime.now()` só se aplica ao ramo de série. | `content_detail.dart:175-178`; `movie_detail_model.dart:152` |
 | B4 | **Busca ignorada fora dos estados de dados.** `HomeController.setList` não faz nada se o estado for `HomeLoading`, `HomeError` ou `HomeInitial`. | `home_controller.dart:7-23` |
-| B5 | **Logout incompleto.** Não remove `account_id` do storage nem invalida a sessão no TMDB (`DELETE /authentication/session`). | `auth_api.dart:31-33` |
+| B5 | **Logout incompleto.** Agora remove `account_id`, mas ainda não invalida a sessão no TMDB (`DELETE /authentication/session`). | `auth_api.dart` |
 | B6 | **Favoritar é no-op.** O ícone de coração tem `onTap: () {}`. | `content_detail.dart:136` |
 | B7 | `Image.network("")` sem `errorBuilder` quando o usuário não tem avatar (Drawer e Perfil). **Hipótese:** gera erro de carregamento de imagem em tempo de execução. | `home_page.dart:213`; `profile_page.dart:87` |
 
 ### 7.2 Violações arquiteturais e acoplamentos
 | ID | Descrição |
 |---|---|
-| V1 | **Datasource de auth acoplado ao domínio de filmes**: `AuthImplementation` importa e instancia `MovieApi` (camada de repositório) e `MovieImplementation`, fora do locator. Cada `getAccountDetails` (login, `checkExistingSession`, abertura de detalhe de filme) dispara também a busca de favoritos. |
-| V2 | **Contratos `dynamic`**: quatro métodos de repositório retornam JSON cru; o parsing acontece em cubits da apresentação. Os métodos tipados `getMovieDetails`/`getTvShowDetails` existem mas **não são usados** por nenhum caso de uso. |
-| V3 | **Apresentação depende de `data/models`** (`CrewModel`, `MovieDetailModel`, `TvShowModel`, `TvShowCrew`, `Cast`). |
-| V4 | **Service locator dentro das classes** (`getIt<T>()` em campos de cubits/controllers/pages): dependências ocultas e testes difíceis. |
-| V5 | ~~**`ProfileCubit` ignora a camada de casos de uso**~~ **[Resolvida]** `ProfileCubit` agora resolve `GetUserFavoritesUsecases` via `getIt` em vez de usar `MovieRepository` direto. |
+| V1 | ✅ **Resolvido.** `AuthImplementation` não depende mais de `MovieApi`/`MovieImplementation`; favoritos ficam em `UserImplementation`. |
+| V2 | ✅ **Resolvido.** Contratos tipados (`Credits`, `Movie`, `TvShow`); parsing feito em `data/`. |
+| V3 | ✅ **Resolvido.** A apresentação não importa `data/`. |
+| V4 | ✅ **Resolvido** em cubits e controllers (injeção por construtor). As pages ainda chamam `getIt<T>()` para obter cubits/controllers — uso aceito pela diretriz 4. |
+| V5 | ✅ **Resolvido.** `ProfileCubit` usa `GetUserFavoritesUseCase`. |
 | V6 | **`core/locator.dart` importa `presentation/`**: o "núcleo" depende de todas as camadas. Aceitável para *composition root*, mas o arquivo vive em `core/`, que também é importado por `data/` e `presentation/`. |
 | V7 | **Widgets importam páginas** (`ContentList` → `MovieDetailPage`/`TvShowDetailPage`): navegação embutida em componente reutilizável. |
-| V8 | **Widgets genéricos com `dynamic`** (`ContentDetail`, `ContentCreditWidget`, `CastCard`, `ContentList`): sem segurança de tipos entre filme/série; distinção por string `type == "movie" / "tv"`. |
-| V9 | **Entidade mutável**: `User.favoriteMovies` não é `final` e é atribuída após construção (`auth_implementation.dart:64`). |
-| V10 | **Requisições redundantes**: `MovieCubit.filterCrew` chama `GetCurrentUserUseCase` a cada abertura de filme, resultando em `GET /account` + `GET favorites` só para calcular `isFavorite`. |
+| V8 | **`ContentDetail.content` é `dynamic`** (filme ou série), com distinção pela string `type == "movie" / "tv"`. Elenco e diretor já são tipados (`CastMember`). |
+| V9 | ✅ **Resolvido.** `User` não tem mais `favoriteMovies`; todos os campos são `final`. |
+| V10 | **Parcialmente resolvido.** Abrir um filme não chama mais `GET /account`; ainda faz `GET favorites` para calcular `isFavorite`. |
 
-### 7.3 Módulos e símbolos órfãos **[Órfão]**
+### 7.3 Módulos e símbolos órfãos
 | Item | Situação |
 |---|---|
-| `core/services/auth_service.dart`, `movie_service.dart`, `tv_service.dart` | Não importados por nenhum arquivo nem registrados no locator. Duplicam a lógica dos datasources. |
-| `core/shared/routes.dart` | Arquivo vazio. |
-| `domain/repositories/user_repository.dart` (`UserRepository`) | Sem implementação e sem uso. |
-| `HomePeople` (estado) | Declarado, nunca emitido. |
-| `MovieRepository.getMovieDetails` / `TvRepository.getTvShowDetails` (tipados) | Implementados, nunca chamados. |
-| `AppColors` como instância | Registrado no locator e instanciado em `TvShowDetailPage`, mas campos são `static`; as variáveis `appColors` não são usadas. |
-| `firebase_core`, `firebase.json`, `.firebaserc`, `public/`, `android/app/google-services.json` | Configuração Firebase sem uso em `lib/`. `public/index.html` é o template padrão do Firebase Hosting. |
+| `core/services/*`, `core/shared/routes.dart`, `HomePeople`, `GetUserFavoritesUsecases` | ✅ **Removidos** (ou substituídos por `GetUserFavoritesUseCase`, em uso). |
+| `UserRepository` | ✅ Implementado por `UserApi` e usado. |
+| Registro de `AppColors` no locator e variáveis `appColors` | ✅ Removidos (a classe continua com campos `static`). |
+| `firebase_core`, `firebase.json`, `.firebaserc`, `public/`, `android/app/google-services.json` | Configuração Firebase sem uso em `lib/` (fora de `lib/`, não coberto pela R9). |
 | `.agents/skills/*`, `skills-lock.json` | Skills de agentes de IA para Firebase; não fazem parte do app. |
 | `test/home_test.dart`, `test/login_test.dart` | Contêm apenas `void main() {}`. |
 
 ### 7.4 Riscos operacionais e de segurança
 | ID | Risco |
 |---|---|
-| S1 | **Credenciais versionadas:** `.vscode/launch.json` contém `API_KEY` e `TOKEN` (TMDB) em `--dart-define`. O `.gitignore` lista `.vscode/`, mas o arquivo já está rastreado. Recomenda-se revogar/rotacionar as credenciais e remover o arquivo do índice. |
+| S1 | **Credenciais no histórico do Git:** `.vscode/launch.json` (com `API_KEY` e `TOKEN`) foi removido do índice, mas continua nos commits anteriores. É preciso revogar/rotacionar as credenciais no TMDB. |
 | S2 | **Token de aplicação embutido no binário** via `String.fromEnvironment` — extraível de builds distribuídos. Inerente a apps cliente-only. |
 | S3 | **Senha do TMDB trafega pelo app** (fluxo `validate_with_login`) em vez do fluxo de aprovação via navegador. |
 | S4 | **Build de release assinado com chave de debug** (`android/app/build.gradle.kts`, `signingConfig = debug`). |
-| S5 | `pubspec.yaml` declara o asset `assets/svg/`, mas a pasta não existe no repositório. **Hipótese:** `flutter build` falha ou emite erro de asset em um clone limpo. |
+| S5 | `pubspec.yaml` declara o asset `assets/svg/`, mas a pasta não existe no repositório. Confirmado: `flutter analyze` emite o aviso `asset_directory_does_not_exist`. **Hipótese:** `flutter build` também falha ou avisa em um clone limpo. |
 | S6 | `material_ui: any` — versão não restrita no `pubspec.yaml`. |
 | S7 | **Sem tratamento de erro tipado:** exceções são engolidas e convertidas em mensagens genéricas; não há retry, logs nem distinção offline/401/404. |
 | S8 | **Sem paginação**: apenas a primeira página de `discover`/`search` é carregada. |
@@ -294,8 +286,8 @@ Drawer "Profile" → ProfilePage → ProfileCubit.initProfile()
 ### 7.5 Dependências críticas
 1. **TMDB API v3** — única fonte de dados. Mudanças de contrato quebram models (parsing manual sem validação).
 2. **`TOKEN` e `API_KEY` via `--dart-define`** — sem eles, todas as chamadas falham (strings vazias). `TOKEN` é usado no header `Authorization`; `API_KEY` só nos endpoints de autenticação.
-3. **`flutter_secure_storage`** — guarda a sessão; chaves `'tmdb_session_id'` e `'account_id'` estão espalhadas como literais em `auth_implementation.dart`, `movie_implementation.dart` e `auth_api.dart`.
-4. **`get_it`** — toda a resolução de dependências; erro de registro só aparece em tempo de execução.
+3. **`flutter_secure_storage`** — guarda a sessão; chaves centralizadas em `core/shared/storage_keys.dart` e instância única registrada no locator.
+4. **`get_it`** — monta todo o grafo; erro de registro só aparece em tempo de execução.
 5. **`material_ui`** — substitui o import Material em todos os widgets; troca/remoção afeta toda a camada de apresentação.
 
 ---
@@ -318,14 +310,12 @@ Drawer "Profile" → ProfilePage → ProfileCubit.initProfile()
 
 | Prioridade | Ação | Resolve |
 |---|---|---|
-| P0 | Revogar credenciais TMDB expostas e remover `.vscode/launch.json` do Git. | S1 |
-| P0 | Corrigir montagem da equipe em `MovieCubit` (incluir `crew` com `job == "Director"`). | B1 |
-| P1 | Tipar contratos (`MovieCredits`, `MovieDetail`, `TvShowDetail`, `TvCredits` como entidades) e mover parsing para `data/`. | V2, V3, R3, R4 |
-| P1 | Remover dependência `AuthImplementation → MovieApi`; buscar favoritos via caso de uso dedicado (`GetUserFavoritesUsecases`, já usado pelo `ProfileCubit`). | V1, V10 |
+| P0 | Revogar/rotacionar as credenciais TMDB que estão no histórico do Git. | S1 |
 | P1 | Corrigir `DateFormat` com data nula e `Image.network("")`. | B3, B7 |
-| P2 | Remover `core/services/`, `routes.dart`, `UserRepository` (ou implementá-lo), `HomePeople`. | 7.3 |
-| P2 | Injetar dependências por construtor e registrar `SerieCubit` no locator; usar `BlocProvider` para ciclo de vida. | V4, R6, S9 |
-| P2 | Escrever testes unitários de casos de uso, repositórios e cubits. | S12 |
+| P1 | Corrigir "Settings" do Drawer (instância de `HomeCubit` desconectada). | B2 |
+| P2 | Usar `BlocProvider`/`close()` para ciclo de vida dos cubits; `dispose()` nos controllers de texto. | S9 |
+| P2 | Escrever testes unitários de casos de uso, repositórios e cubits (agora possível com injeção por construtor). | S12 |
+| P2 | Tipar `ContentDetail.content` e retirar a navegação de `ContentList`. | V7, V8 |
 | P3 | Padronizar nomes (seção 4.2), idioma da UI e nome do produto. | 4.2 |
 | P3 | Decidir sobre Firebase: integrar (`Firebase.initializeApp`) ou remover dependência/configuração. | 7.3 |
 
@@ -346,12 +336,12 @@ Drawer "Profile" → ProfilePage → ProfileCubit.initProfile()
    9. `core/locator.dart` — registro de **todas** as novas classes.
    10. `test/` — testes por camada.
 3. **Dependências permitidas:** `presentation → domain`; `data → domain`; `data → core/shared`; `presentation → core/shared`; `core/locator → *`. Qualquer outra direção é violação.
-4. **Não use `getIt` dentro de classes de domínio ou dados.** Prefira injeção por construtor; o `getIt` deve aparecer apenas no locator e, se necessário, na criação de pages/cubits.
-5. **Não crie novo código em `core/services/`**; o módulo é legado e está marcado para remoção.
+4. **Injeção por construtor.** `getIt` aparece apenas no locator e nas pages (para obter cubits/controllers). Nunca em cubits, controllers, casos de uso, repositórios ou datasources.
+5. **Acesso HTTP só em `data/datasources/implementations/`.**
 6. **Segredos** apenas via `--dart-define` local, nunca em arquivos versionados.
-7. **Chaves de storage** devem ser centralizadas em constantes (ex.: `core/shared/storage_keys.dart` — **proposta**, não existe hoje).
+7. **Chaves de storage** devem ser declaradas em `core/shared/storage_keys.dart`.
 8. **Novos estados de Cubit** devem cobrir explicitamente `Initial`, `Loading`, `Success`, `Error` e ser tratados na page.
-9. **Navegação:** se `routes.dart` for adotado, migrar todas as navegações; não misturar abordagens.
+9. **Navegação:** se rotas nomeadas forem adotadas, migrar todas as navegações; não misturar abordagens.
 10. **Consistência documental:** qualquer alteração em pastas de `lib/` exige atualização do README local correspondente e, se impactar fluxo ou regra, deste documento.
 
 ---
@@ -368,7 +358,7 @@ Drawer "Profile" → ProfilePage → ProfileCubit.initProfile()
 
 ## 12. Índice de documentação local
 - [`lib/README.md`](../lib/README.md)
-- [`lib/core/README.md`](../lib/core/README.md) · [`lib/core/shared/README.md`](../lib/core/shared/README.md) · [`lib/core/services/README.md`](../lib/core/services/README.md)
+- [`lib/core/README.md`](../lib/core/README.md) · [`lib/core/shared/README.md`](../lib/core/shared/README.md)
 - [`lib/domain/README.md`](../lib/domain/README.md) · [`entities`](../lib/domain/entities/README.md) · [`repositories`](../lib/domain/repositories/README.md) · [`usecases`](../lib/domain/usecases/README.md)
 - [`lib/data/README.md`](../lib/data/README.md) · [`datasources`](../lib/data/datasources/README.md) · [`models`](../lib/data/models/README.md) · [`repositories`](../lib/data/repositories/README.md)
 - [`lib/presentation/README.md`](../lib/presentation/README.md) · [`bloc`](../lib/presentation/bloc/README.md) · [`controllers`](../lib/presentation/controllers/README.md) · [`pages`](../lib/presentation/pages/README.md) · [`widgets`](../lib/presentation/widgets/README.md)

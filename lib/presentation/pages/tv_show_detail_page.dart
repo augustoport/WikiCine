@@ -1,9 +1,10 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:cinerating/presentation/bloc/serie_detail/serie_cubit.dart';
 import 'package:cinerating/presentation/widgets/content_detail.dart';
-import 'package:cinerating/core/shared/themes/app_colors.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../core/locator.dart';
 
 class TvShowDetailPage extends StatefulWidget {
   final String id;
@@ -14,8 +15,7 @@ class TvShowDetailPage extends StatefulWidget {
 }
 
 class _TvShowDetailPageState extends State<TvShowDetailPage> {
-  final SerieCubit _tvCubit = SerieCubit();
-  AppColors appColors = AppColors();
+  final _tvCubit = getIt<SerieCubit>();
 
   @override
   void initState() {

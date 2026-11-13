@@ -18,8 +18,6 @@ class HomeTv extends HomeStates {
   final List<TvShow>? tvShows;
 }
 
-class HomePeople extends HomeStates {}
-
 class HomeError extends HomeStates {
   HomeError(this.message);
 

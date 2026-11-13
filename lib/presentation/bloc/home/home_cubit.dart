@@ -1,26 +1,30 @@
 import 'package:bloc/bloc.dart';
-import 'package:cinerating/core/locator.dart';
-import 'package:cinerating/domain/entities/movie.dart';
-import 'package:cinerating/domain/entities/tv_show.dart';
-import 'package:cinerating/domain/usecases/movies/get_movies_usecase.dart';
-import 'package:cinerating/domain/usecases/tv_show/get_tv_shows_usecase.dart';
-import 'package:cinerating/domain/usecases/movies/search_movies_usecase.dart';
-import 'package:cinerating/domain/usecases/tv_show/search_tv_shows_usecase.dart';
+
+import '../../../domain/entities/movie.dart';
+import '../../../domain/entities/tv_show.dart';
+import '../../../domain/usecases/movies/get_movies_usecase.dart';
+import '../../../domain/usecases/movies/search_movies_usecase.dart';
+import '../../../domain/usecases/tv_show/get_tv_shows_usecase.dart';
+import '../../../domain/usecases/tv_show/search_tv_shows_usecase.dart';
 
 part 'home_states.dart';
 
 class HomeCubit extends Cubit<HomeStates> {
-  HomeCubit() : super(HomeInitial()) {
-    _getMoviesUseCase = getIt<GetMoviesUseCase>();
-    _searchMoviesUseCase = getIt<SearchMoviesUseCase>();
-    _getTvShowsUseCase = getIt<GetTvShowsUseCase>();
-    _searchTvShowsUseCase = getIt<SearchTvShowsUseCase>();
-  }
+  HomeCubit({
+    required GetMoviesUseCase getMoviesUseCase,
+    required SearchMoviesUseCase searchMoviesUseCase,
+    required GetTvShowsUseCase getTvShowsUseCase,
+    required SearchTvShowsUseCase searchTvShowsUseCase,
+  }) : _getMoviesUseCase = getMoviesUseCase,
+       _searchMoviesUseCase = searchMoviesUseCase,
+       _getTvShowsUseCase = getTvShowsUseCase,
+       _searchTvShowsUseCase = searchTvShowsUseCase,
+       super(HomeInitial());
 
-  late final GetMoviesUseCase _getMoviesUseCase;
-  late final SearchMoviesUseCase _searchMoviesUseCase;
-  late final GetTvShowsUseCase _getTvShowsUseCase;
-  late final SearchTvShowsUseCase _searchTvShowsUseCase;
+  final GetMoviesUseCase _getMoviesUseCase;
+  final SearchMoviesUseCase _searchMoviesUseCase;
+  final GetTvShowsUseCase _getTvShowsUseCase;
+  final SearchTvShowsUseCase _searchTvShowsUseCase;
 
   Future<void> getMovies() async {
     emit(HomeLoading());

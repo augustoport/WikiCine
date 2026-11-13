@@ -1,3 +1,4 @@
+import '../../entities/movie.dart';
 import '../../repositories/movie_repository.dart';
 
 class GetMovieDetailsUseCase {
@@ -5,7 +6,7 @@ class GetMovieDetailsUseCase {
 
   GetMovieDetailsUseCase(this.movieRepository);
 
-  Future<dynamic> call(String movieId) {
-    return movieRepository.getMovieDetailsFull(movieId);
+  Future<Movie> call(String movieId) {
+    return movieRepository.getMovieDetails(movieId);
   }
 }

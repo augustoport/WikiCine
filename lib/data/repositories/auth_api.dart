@@ -1,5 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import '../../core/shared/storage_keys.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/data/auth_data.dart';
@@ -17,7 +18,7 @@ class AuthApi implements AuthRepository {
 
   @override
   Future<User?> getCurrentUser() async {
-    final sessionId = await storage.read(key: 'tmdb_session_id');
+    final sessionId = await storage.read(key: StorageKeys.sessionId);
     if (sessionId == null) return null;
 
     try {
@@ -29,6 +30,7 @@ class AuthApi implements AuthRepository {
 
   @override
   Future<void> logout() async {
-    await storage.delete(key: 'tmdb_session_id');
+    await storage.delete(key: StorageKeys.sessionId);
+    await storage.delete(key: StorageKeys.accountId);
   }
 }

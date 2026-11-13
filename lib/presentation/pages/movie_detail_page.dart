@@ -1,6 +1,5 @@
 import 'package:cinerating/presentation/bloc/movie_detail/movie_cubit.dart';
 import 'package:cinerating/presentation/widgets/content_detail.dart';
-import 'package:cinerating/core/shared/themes/app_colors.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../core/locator.dart';
@@ -15,7 +14,6 @@ class MovieDetailPage extends StatefulWidget {
 
 class _MovieDetailPageState extends State<MovieDetailPage> {
   final movieCubit = getIt<MovieCubit>();
-  final appColors = getIt<AppColors>();
 
   @override
   void initState() {
