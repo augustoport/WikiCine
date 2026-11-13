@@ -54,7 +54,7 @@ lib/
 | `material_ui` | 1.11.0 | Importado no lugar de `package:flutter/material.dart` em todos os widgets. **Hipótese:** pacote que reexporta a biblioteca Material do Flutter. |
 | `dio` | ^5.9.2 | Cliente HTTP em todos os datasources e serviços legados. |
 | `bloc` / `flutter_bloc` | ^9.2.1 / ^9.1.1 | `Cubit` + `BlocBuilder`. Não há `BlocProvider`: cubits são passados via `bloc:`. |
-| `get_it` | ^8.0.0 | Service locator global `getIt` (`core/locator.dart:34`). |
+| `get_it` | ^8.0.0 | Service locator global `getIt` (`core/locator.dart:35`). |
 | `flutter_secure_storage` | ^11.1.0 | Persistência de `tmdb_session_id` e `account_id`. |
 | `cached_network_image` | ^3.4.1 | Apenas em `MovieCard`. Demais imagens usam `Image.network`. |
 | `intl` | ^0.20.3 | `DateFormat("dd/MM/yyyy")` em `ContentDetail`. |
