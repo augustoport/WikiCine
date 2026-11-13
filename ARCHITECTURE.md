@@ -1,3 +1,6 @@
+> ⚠️ **Documento desatualizado.** Este arquivo descreve um estado anterior do projeto e contém nomes de arquivos e afirmações que não correspondem mais ao código.
+> A documentação oficial e atual está em [`docs/ARQUITETURA_DO_SISTEMA.md`](docs/ARQUITETURA_DO_SISTEMA.md) e [`docs/OBJETIVO_DO_SISTEMA.md`](docs/OBJETIVO_DO_SISTEMA.md), com READMEs locais em cada pasta de `lib/`.
+
 # Clean Architecture - CineRating
 
 ## Estrutura de Diretórios
