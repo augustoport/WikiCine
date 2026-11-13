@@ -68,5 +68,5 @@ Injetados nos repositórios pelo locator.
 - **[Débito]** Nenhum tratamento de erro além do `try { } catch { rethrow; }` inócuo em `validateLogin`.
 - **[Débito]** Sem paginação (parâmetro `page`).
 - **[Risco S10]** `language: 'en-US;pt-BR'`. **Hipótese:** valor não reconhecido pelo TMDB.
-- **[Risco S11]** Favoritos sem `session_id`. **Hipótese:** depende de o `TOKEN` pertencer ao mesmo usuário.
+- **[Risco S11]** Favoritos sem `session_id`. O `TOKEN` é da conta do mantenedor (decisão D18); **Hipótese:** para outros usuários a chamada falha ou traz dados da conta errada. Toda chamada `/account/...` deve enviar `session_id`.
 - As interfaces em `data/` não declaram `createRequestToken`, `validateLogin` e `createSession` (métodos públicos só da implementação).

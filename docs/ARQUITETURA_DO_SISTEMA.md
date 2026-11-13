@@ -10,6 +10,8 @@
 > - Trechos marcados com **Hipótese** são inferências não comprovadas pelo código.
 > - Problemas são classificados como **[Violação]**, **[Débito]**, **[Bug]**, **[Risco]** ou **[Órfão]**.
 >
+> Decisões de produto (`D1`–`D19`) e pendências (`P1`–`P4`) confirmadas pelo mantenedor estão em [`OBJETIVO_DO_SISTEMA.md` seção 8](./OBJETIVO_DO_SISTEMA.md#8-decisões-de-produto-entrevista-com-o-mantenedor-2026-11-13).
+>
 > Documentos relacionados: [`OBJETIVO_DO_SISTEMA.md`](./OBJETIVO_DO_SISTEMA.md) · READMEs locais em cada pasta de `lib/` e `test/` (índice na seção 12).
 >
 > Este documento substitui o antigo `ARCHITECTURE.md` (removido por estar desatualizado).
@@ -282,9 +284,9 @@ Drawer "Profile" → ProfilePage → ProfileCubit.initProfile()
 | S7 | **Sem tratamento de erro tipado:** exceções são engolidas e convertidas em mensagens genéricas; não há retry, logs nem distinção offline/401/404. |
 | S8 | **Sem paginação**: apenas a primeira página de `discover`/`search` é carregada. |
 | S9 | **Recursos não liberados:** cubits nunca recebem `close()`; `TextEditingController`s (em `LoginController` singleton e `HomeController`) nunca recebem `dispose()`. |
-| S10 | `language: 'en-US;pt-BR'` não segue o formato de idioma único do TMDB. **Hipótese:** a API ignora o valor e usa o padrão `en-US`. |
-| S11 | Endpoint `/account/{id}/favorite/movies` é chamado **sem** `session_id`. **Hipótese:** funciona apenas porque o `TOKEN` Bearer é do mesmo usuário dono da conta; para outros usuários pode retornar 401 ou dados de outra conta. |
-| S12 | **Parcialmente resolvido.** Há testes de casos de uso, de widget e de integração; faltam testes de `data/` (models, datasources, repositórios), dos cubits/controllers isolados e CI. |
+| S10 | `language: 'en-US;pt-BR'` não segue o formato de idioma único do TMDB. **Hipótese:** a API ignora o valor e usa o padrão `en-US`. Decisão D14: passar o idioma da interface (ex.: `pt-BR`) em todas as chamadas. |
+| S11 | Endpoint `/account/{id}/favorite/movies` é chamado **sem** `session_id`. O mantenedor confirmou que o `TOKEN` é da **sua própria conta TMDB** (D18), o que explica por que funciona nos testes dele. **Hipótese:** para outros usuários, a chamada falha (401) ou retorna dados da conta do mantenedor. Correção: enviar o `session_id` (impacto I1). |
+| S12 | **Cobertura de testes nula.** |
 
 ### 7.5 Dependências críticas
 1. **TMDB API v3** — única fonte de dados. Mudanças de contrato quebram models (parsing manual sem validação).
@@ -346,6 +348,9 @@ Drawer "Profile" → ProfilePage → ProfileCubit.initProfile()
 8. **Novos estados de Cubit** devem cobrir explicitamente `Initial`, `Loading`, `Success`, `Error` e ser tratados na page.
 9. **Navegação:** se rotas nomeadas forem adotadas, migrar todas as navegações; não misturar abordagens.
 10. **Consistência documental:** qualquer alteração em pastas de `lib/` exige atualização do README local correspondente e, se impactar fluxo ou regra, deste documento.
+11. **Chamadas de conta** (`/account/...`: favoritos, watchlist, avaliações) devem sempre enviar o `session_id` do usuário logado (impacto I1).
+12. **Idioma:** chamadas de catálogo e detalhe devem enviar `language` com o idioma da interface (D13, D14). Textos de UI devem vir de arquivos de tradução, não fixos no widget.
+13. **Nome do produto:** usar "WikiCine" em todo texto visível ao usuário (D1).
 
 ---
 
