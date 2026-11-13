@@ -144,7 +144,7 @@ As regras abaixo descrevem o **contrato desejado**. A coluna "Status" indica a a
 | `presentation/controllers/` | `LoginController` (sessão) e `HomeController` (busca). | [`lib/presentation/controllers/README.md`](../lib/presentation/controllers/README.md) |
 | `presentation/pages/` | 5 telas: Login, Home (+Drawer), Detalhe de filme, Detalhe de série, Perfil. | [`lib/presentation/pages/README.md`](../lib/presentation/pages/README.md) |
 | `presentation/widgets/` | Componentes visuais reutilizáveis. | [`lib/presentation/widgets/README.md`](../lib/presentation/widgets/README.md) |
-| `test/` | Testes (atualmente vazios). | [`test/README.md`](../test/README.md) |
+| `test/`, `integration_test/` | Testes unitários (casos de uso), de widget (páginas e widgets de conteúdo) e de integração (fluxo completo com repositórios falsos). | [`test/README.md`](../test/README.md) |
 
 ---
 
@@ -239,11 +239,14 @@ Drawer "Profile" → ProfilePage → ProfileCubit.initProfile()
 |---|---|---|
 | B1 | ✅ **Resolvido.** O diretor do filme não era exibido porque só o `cast` era lido. Agora `MovieImplementation.getMovieCredits` busca o diretor em `crew`. | `movie_implementation.dart` |
 | B2 | **Menu "Settings" do Drawer não tem efeito visível.** Faz `getIt<HomeCubit>()`, mas `HomeCubit` é `registerFactory`: cria uma nova instância, diferente da usada pela `HomePage`. | `home_page.dart:255-259`; `locator.dart:110` |
-| B3 | **Possível exceção ao renderizar filme sem data.** `DateFormat.format` recebe `content.releaseDate` (pode ser `null`) quando `type == "movie"`; o `?? DateTime.now()` só se aplica ao ramo de série. | `content_detail.dart:175-178`; `movie_detail_model.dart:152` |
+| B3 | **Exceção ao renderizar filme sem data** (confirmado por teste, hoje marcado como `skip` em `content_detail_test.dart`). `DateFormat.format` recebe `content.releaseDate` (pode ser `null`) quando `type == "movie"`; o `?? DateTime.now()` só se aplica ao ramo de série. | `content_detail.dart:175-178`; `movie_detail_model.dart:152` |
 | B4 | **Busca ignorada fora dos estados de dados.** `HomeController.setList` não faz nada se o estado for `HomeLoading`, `HomeError` ou `HomeInitial`. | `home_controller.dart:7-23` |
 | B5 | **Logout incompleto.** Agora remove `account_id`, mas ainda não invalida a sessão no TMDB (`DELETE /authentication/session`). | `auth_api.dart` |
 | B6 | **Favoritar é no-op.** O ícone de coração tem `onTap: () {}`. | `content_detail.dart:136` |
 | B7 | `Image.network("")` sem `errorBuilder` quando o usuário não tem avatar (Drawer e Perfil). **Hipótese:** gera erro de carregamento de imagem em tempo de execução. | `home_page.dart:213`; `profile_page.dart:87` |
+| B8 | ✅ **Resolvido (achado pelos testes).** A aba TV quebrava: `ContentList` lia `show.title` e `TvShow` não tem esse getter (`NoSuchMethodError`). Agora usa `title` para filmes e `name` para séries. | `content_list.dart` |
+| B9 | ✅ **Resolvido (achado pelos testes).** `ListTile`s do Drawer dentro de `Container` com cor de fundo disparavam assertion em modo debug; o fundo passou a ser um `Material`. | `home_page.dart` (`DrawerWidget`) |
+| B10 | ✅ **Resolvido (achado pelos testes).** Logout pelo Drawer disparava "setState() called during build": `LoginPage.initState` chamava `checkExistingSession()` (que notifica o `DrawerWidget` ainda montado) de forma síncrona. Agora é adiado com `Future.microtask`. | `login_page.dart` |
 
 ### 7.2 Violações arquiteturais e acoplamentos
 | ID | Descrição |
@@ -267,7 +270,7 @@ Drawer "Profile" → ProfilePage → ProfileCubit.initProfile()
 | Registro de `AppColors` no locator e variáveis `appColors` | ✅ Removidos (a classe continua com campos `static`). |
 | `firebase_core`, `firebase.json`, `.firebaserc`, `public/`, `android/app/google-services.json` | Configuração Firebase sem uso em `lib/` (fora de `lib/`, não coberto pela R9). |
 | `.agents/skills/*`, `skills-lock.json` | Skills de agentes de IA para Firebase; não fazem parte do app. |
-| `test/home_test.dart`, `test/login_test.dart` | Contêm apenas `void main() {}`. |
+| `test/home_test.dart`, `test/login_test.dart` | ✅ Removidos (eram vazios); substituídos pela suíte em `test/` e `integration_test/`. |
 
 ### 7.4 Riscos operacionais e de segurança
 | ID | Risco |
@@ -316,7 +319,7 @@ Drawer "Profile" → ProfilePage → ProfileCubit.initProfile()
 | P1 | Corrigir `DateFormat` com data nula e `Image.network("")`. | B3, B7 |
 | P1 | Corrigir "Settings" do Drawer (instância de `HomeCubit` desconectada). | B2 |
 | P2 | Usar `BlocProvider`/`close()` para ciclo de vida dos cubits; `dispose()` nos controllers de texto. | S9 |
-| P2 | Escrever testes unitários de casos de uso, repositórios e cubits (agora possível com injeção por construtor). | S12 |
+| P2 | Completar testes: `data/models` (`fromMap`), datasources/repositórios, cubits e controllers; rodar `flutter test` em CI. | S12 |
 | P2 | Tipar `ContentDetail.content` e retirar a navegação de `ContentList`. | V7, V8 |
 | P3 | Padronizar nomes (seção 4.2), idioma da UI e nome do produto. | 4.2 |
 | P3 | Decidir sobre Firebase: integrar (`Firebase.initializeApp`) ou remover dependência/configuração. | 7.3 |

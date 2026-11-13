@@ -105,7 +105,7 @@ WikiCine é um **aplicativo móvel (Flutter) de consulta a filmes e séries** qu
 | Ambientes | Um único (`Environment.production`). |
 | Idioma | Hoje: interface mista português/inglês; dados do TMDB em inglês por padrão (**Hipótese**, ver S10 na arquitetura). Decisão: interface multi-idioma (D13) e dados do TMDB no idioma da interface (D14). |
 | Observabilidade | Nenhuma (sem logs, crash reporting ou analytics ativos). |
-| Testes / CI | Inexistentes. |
+| Testes / CI | Testes unitários (casos de uso), de widget e de integração (`flutter test`, `flutter test integration_test`). Sem CI. |
 | Limites externos | Sujeito às regras de uso e limites de requisição do TMDB (**Hipótese** quanto aos valores exatos). |
 
 ## 8. Decisões de produto (entrevista com o mantenedor, 2026-11-13)

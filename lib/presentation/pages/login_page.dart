@@ -20,7 +20,9 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    loginController.checkExistingSession();
+    // Adiado: notifica listeners (ex.: DrawerWidget da rota anterior) e não
+    // pode rodar durante o build.
+    Future.microtask(loginController.checkExistingSession);
   }
 
   @override

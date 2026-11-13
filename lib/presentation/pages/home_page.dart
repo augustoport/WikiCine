@@ -197,8 +197,8 @@ class _DrawerWidgetState extends State<DrawerWidget> {
     return ListenableBuilder(
       listenable: loginController,
       builder: (context, child) {
-        return Container(
-          decoration: BoxDecoration(color: AppColors.backgroundColor),
+        return Material(
+          color: AppColors.backgroundColor,
           child: Column(
             children: [
               DrawerHeader(

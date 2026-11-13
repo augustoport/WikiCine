@@ -36,7 +36,7 @@ Construtores dos widgets.
 - `content_detail.dart`
 
 ## Observações técnicas e débitos
-- **[Bug B3]** `DateFormat.format(content.releaseDate)` sem fallback para filmes com data nula.
+- **[Bug B3]** `DateFormat.format(content.releaseDate)` sem fallback para filmes com data nula (teste correspondente marcado como `skip` em `test/presentation/widgets/content_detail_test.dart`).
 - **[Bug B6]** Ícone de favorito com `onTap: () {}`.
 - **[Violação V7]** `ContentList` importa páginas e navega; deveria receber um callback `onTap`.
 - **[Violação V8]** `ContentDetail.content` e `ContentList.content` ainda são `dynamic` (filme ou série).
