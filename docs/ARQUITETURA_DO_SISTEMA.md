@@ -42,8 +42,6 @@ lib/
       │                                                                                             │
       │ [Violação] importa data/models diretamente                                                  │ [Violação] AuthImplementation
       └────────────────────────────► data/models ◄──────────────────────────────────────────────────┘  instancia MovieApi(MovieImplementation())
-      │
-      └──► domain/repositories (ProfileCubit usa MovieRepository sem caso de uso)
 
  data/models ──► domain/entities (models estendem entidades)
  data/*, data/models ──► core/shared/env.dart (URLs e tokens)
@@ -58,7 +56,7 @@ lib/
 | `material_ui` | 1.11.0 | Importado no lugar de `package:flutter/material.dart` em todos os widgets. **Hipótese:** pacote que reexporta a biblioteca Material do Flutter. |
 | `dio` | ^5.9.2 | Cliente HTTP em todos os datasources e serviços legados. |
 | `bloc` / `flutter_bloc` | ^9.2.1 / ^9.1.1 | `Cubit` + `BlocBuilder`. Não há `BlocProvider`: cubits são passados via `bloc:`. |
-| `get_it` | ^8.0.0 | Service locator global `getIt` (`core/locator.dart:34`). |
+| `get_it` | ^8.0.0 | Service locator global `getIt` (`core/locator.dart:35`). |
 | `flutter_secure_storage` | ^11.1.0 | Persistência de `tmdb_session_id` e `account_id`. |
 | `cached_network_image` | ^3.4.1 | Apenas em `MovieCard`. Demais imagens usam `Image.network`. |
 | `intl` | ^0.20.3 | `DateFormat("dd/MM/yyyy")` em `ContentDetail`. |
@@ -93,11 +91,11 @@ As regras abaixo descrevem o **contrato desejado**. A coluna "Status" indica a a
 | # | Regra | Status atual |
 |---|---|---|
 | R1 | `domain/` não importa `data/`, `presentation/`, `core/` nem pacotes de infraestrutura (Dio, storage, Flutter). | ✅ Cumprida. `domain/` só importa a si mesmo. |
-| R2 | `presentation/` acessa dados **somente via casos de uso** do `domain/`. | ❌ `ProfileCubit` usa `MovieRepository` direto (`profile_cubit.dart:10`). |
+| R2 | `presentation/` acessa dados **somente via casos de uso** do `domain/`. | ✅ Cumprida. `ProfileCubit` passou a usar `GetUserFavoritesUsecases` (`profile_cubit.dart:10`). |
 | R3 | `presentation/` não importa `data/`. | ❌ `MovieCubit`, `SerieCubit`, `movie_states.dart`, `serie_state.dart` e `ContentDetail` importam `data/models/*`. |
 | R4 | Contratos de domínio retornam **entidades tipadas**, nunca `dynamic`/JSON cru. | ❌ `getMovieCrew`, `getMovieDetailsFull`, `getTvShowCrew`, `getTvShowDetailsFull` retornam `Future<dynamic>` (JSON). |
 | R5 | Um datasource não depende de repositórios nem de outros datasources; composição é feita no locator. | ❌ `AuthImplementation.getAccountDetails` faz `MovieApi(MovieImplementation())` (`auth_implementation.dart:58`). |
-| R6 | Toda dependência é registrada em `core/locator.dart`. | ❌ `SerieCubit` é instanciado com `SerieCubit()` em `tv_show_detail_page.dart:17`; `UserRepository` e `GetUserFavoritesUsecases` não são registrados. |
+| R6 | Toda dependência é registrada em `core/locator.dart`. | ❌ `SerieCubit` é instanciado com `SerieCubit()` em `tv_show_detail_page.dart:17`; `UserRepository` não é registrado. |
 | R7 | Somente `core/shared/env.dart` conhece URLs, tokens e chaves. | ✅ Cumprida (com exceção do link de cadastro TMDB em `login_page.dart:62`). |
 | R8 | Segredos não são versionados. | ❌ `.vscode/launch.json` (versionado apesar de constar no `.gitignore`) contém `API_KEY` e `TOKEN` reais. |
 | R9 | Todo código em `lib/` é alcançável a partir de `main.dart`. | ❌ Ver módulos órfãos (seção 7.3). |
@@ -216,7 +214,7 @@ TvShowDetailPage → SerieCubit() (instanciado direto)
 ### 6.7 Perfil
 ```
 Drawer "Profile" → ProfilePage → ProfileCubit.initProfile()
-   MovieRepository.getFavoriteMovies() (sem caso de uso) → GET /account/{account_id}/favorite/movies
+   GetUserFavoritesUsecases → MovieRepository.getFavoriteMovies() → GET /account/{account_id}/favorite/movies
    emit ProfileSuccess(favorites, watchlist: [])  → lista horizontal → tap → MovieDetailPage
    Cabeçalho usa LoginController.currentUser (singleton).
 ```
@@ -230,7 +228,7 @@ Drawer "Profile" → ProfilePage → ProfileCubit.initProfile()
 | `AppColors` | `registerSingleton` (mas todos os campos são `static`) |
 | `AuthData`, `MovieData`, `TvData` | `registerLazySingleton` |
 | `AuthRepository`, `MovieRepository`, `TvRepository` | `registerLazySingleton` |
-| 11 casos de uso | `registerFactory` (não registra `GetUserFavoritesUsecases`) |
+| 12 casos de uso (incl. `GetUserFavoritesUsecases`) | `registerFactory` |
 | `LoginController` | `registerLazySingleton` |
 | `HomeController` | `registerFactory` |
 | `HomeCubit`, `ProfileCubit`, `MovieCubit` | `registerFactory` (não registra `SerieCubit`) |
@@ -243,7 +241,7 @@ Drawer "Profile" → ProfilePage → ProfileCubit.initProfile()
 | ID | Descrição | Evidência |
 |---|---|---|
 | B1 | **Diretor do filme nunca é exibido.** `MovieCubit` monta `crewList` apenas a partir de `crew['cast']`; entradas de elenco não têm `job == "Director"`, então `filterCrew` sempre cai no `orElse` (`name: "N/A"`) e `ContentCreditWidget` oculta o bloco. O serviço legado incluía a equipe (`crew`) filtrando "Director". | `movie_cubit.dart:42-45`, `:24-27`; `content_detail.dart:286` |
-| B2 | **Menu "Settings" do Drawer não tem efeito visível.** Faz `getIt<HomeCubit>()`, mas `HomeCubit` é `registerFactory`: cria uma nova instância, diferente da usada pela `HomePage`. | `home_page.dart:255-259`; `locator.dart:110` |
+| B2 | **Menu "Settings" do Drawer não tem efeito visível.** Faz `getIt<HomeCubit>()`, mas `HomeCubit` é `registerFactory`: cria uma nova instância, diferente da usada pela `HomePage`. | `home_page.dart:255-259`; `locator.dart:116` |
 | B3 | **Possível exceção ao renderizar filme sem data.** `DateFormat.format` recebe `content.releaseDate` (pode ser `null`) quando `type == "movie"`; o `?? DateTime.now()` só se aplica ao ramo de série. | `content_detail.dart:175-178`; `movie_detail_model.dart:152` |
 | B4 | **Busca ignorada fora dos estados de dados.** `HomeController.setList` não faz nada se o estado for `HomeLoading`, `HomeError` ou `HomeInitial`. | `home_controller.dart:7-23` |
 | B5 | **Logout incompleto.** Não remove `account_id` do storage nem invalida a sessão no TMDB (`DELETE /authentication/session`). | `auth_api.dart:31-33` |
@@ -257,7 +255,7 @@ Drawer "Profile" → ProfilePage → ProfileCubit.initProfile()
 | V2 | **Contratos `dynamic`**: quatro métodos de repositório retornam JSON cru; o parsing acontece em cubits da apresentação. Os métodos tipados `getMovieDetails`/`getTvShowDetails` existem mas **não são usados** por nenhum caso de uso. |
 | V3 | **Apresentação depende de `data/models`** (`CrewModel`, `MovieDetailModel`, `TvShowModel`, `TvShowCrew`, `Cast`). |
 | V4 | **Service locator dentro das classes** (`getIt<T>()` em campos de cubits/controllers/pages): dependências ocultas e testes difíceis. |
-| V5 | **`ProfileCubit` ignora a camada de casos de uso** (usa `MovieRepository` direto, embora `GetUserFavoritesUsecases` exista). |
+| V5 | ~~**`ProfileCubit` ignora a camada de casos de uso**~~ **[Resolvida]** `ProfileCubit` agora resolve `GetUserFavoritesUsecases` via `getIt` em vez de usar `MovieRepository` direto. |
 | V6 | **`core/locator.dart` importa `presentation/`**: o "núcleo" depende de todas as camadas. Aceitável para *composition root*, mas o arquivo vive em `core/`, que também é importado por `data/` e `presentation/`. |
 | V7 | **Widgets importam páginas** (`ContentList` → `MovieDetailPage`/`TvShowDetailPage`): navegação embutida em componente reutilizável. |
 | V8 | **Widgets genéricos com `dynamic`** (`ContentDetail`, `ContentCreditWidget`, `CastCard`, `ContentList`): sem segurança de tipos entre filme/série; distinção por string `type == "movie" / "tv"`. |
@@ -270,7 +268,6 @@ Drawer "Profile" → ProfilePage → ProfileCubit.initProfile()
 | `core/services/auth_service.dart`, `movie_service.dart`, `tv_service.dart` | Não importados por nenhum arquivo nem registrados no locator. Duplicam a lógica dos datasources. |
 | `core/shared/routes.dart` | Arquivo vazio. |
 | `domain/repositories/user_repository.dart` (`UserRepository`) | Sem implementação e sem uso. |
-| `domain/usecases/user/get_user_favorites_usecases.dart` | Não registrado e não usado. |
 | `HomePeople` (estado) | Declarado, nunca emitido. |
 | `MovieRepository.getMovieDetails` / `TvRepository.getTvShowDetails` (tipados) | Implementados, nunca chamados. |
 | `AppColors` como instância | Registrado no locator e instanciado em `TvShowDetailPage`, mas campos são `static`; as variáveis `appColors` não são usadas. |
@@ -324,7 +321,7 @@ Drawer "Profile" → ProfilePage → ProfileCubit.initProfile()
 | P0 | Revogar credenciais TMDB expostas e remover `.vscode/launch.json` do Git. | S1 |
 | P0 | Corrigir montagem da equipe em `MovieCubit` (incluir `crew` com `job == "Director"`). | B1 |
 | P1 | Tipar contratos (`MovieCredits`, `MovieDetail`, `TvShowDetail`, `TvCredits` como entidades) e mover parsing para `data/`. | V2, V3, R3, R4 |
-| P1 | Remover dependência `AuthImplementation → MovieApi`; buscar favoritos via caso de uso dedicado (`GetUserFavoritesUsecases`). | V1, V5, V10 |
+| P1 | Remover dependência `AuthImplementation → MovieApi`; buscar favoritos via caso de uso dedicado (`GetUserFavoritesUsecases`, já usado pelo `ProfileCubit`). | V1, V10 |
 | P1 | Corrigir `DateFormat` com data nula e `Image.network("")`. | B3, B7 |
 | P2 | Remover `core/services/`, `routes.dart`, `UserRepository` (ou implementá-lo), `HomePeople`. | 7.3 |
 | P2 | Injetar dependências por construtor e registrar `SerieCubit` no locator; usar `BlocProvider` para ciclo de vida. | V4, R6, S9 |

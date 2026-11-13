@@ -14,7 +14,7 @@ Ser a **única porta** da apresentação para o domínio (regra R2).
 | `auth/` | `LoginUseCase` | `AuthRepository.login` | ✅ factory | `LoginController` |
 | `auth/` | `LogoutUseCase` | `AuthRepository.logout` | ✅ factory | `LoginController` |
 | `user/` | `GetCurrentUserUseCase` | `AuthRepository.getCurrentUser` | ✅ factory | `LoginController`, `MovieCubit` |
-| `user/` | `GetUserFavoritesUsecases` | `MovieRepository.getFavoriteMovies` | ❌ | **Nenhum (órfão)** |
+| `user/` | `GetUserFavoritesUsecases` | `MovieRepository.getFavoriteMovies` | ✅ factory | `ProfileCubit` |
 | `movies/` | `GetMoviesUseCase` | `MovieRepository.getMovies` | ✅ factory | `HomeCubit` |
 | `movies/` | `SearchMoviesUseCase` | `MovieRepository.searchMovies` | ✅ factory | `HomeCubit` |
 | `movies/` | `GetMovieDetailsUseCase` | `MovieRepository.getMovieDetailsFull` → `dynamic` | ✅ factory | `MovieCubit` |
@@ -44,4 +44,4 @@ Ver fluxos 6.2 a 6.6 na arquitetura.
 - **[Débito]** Todos são *pass-through*; nenhuma regra de negócio. Candidatas a mover para cá: seleção de elenco/diretor e cálculo de "é favorito" (hoje em `MovieCubit`).
 - **[Violação R4]** `GetMovieDetailsUseCase` usa o método `...Full` (`dynamic`) em vez do tipado `getMovieDetails`. Idem para TV.
 - **[Débito]** `GetCurrentUserUseCase` está em `user/` mas depende de `AuthRepository`.
-- **[Órfão]** `GetUserFavoritesUsecases` (nome também fora do padrão: deveria ser `GetUserFavoritesUseCase`). `ProfileCubit` deveria usá-lo.
+- **[Débito]** `GetUserFavoritesUsecases` tem nome fora do padrão (deveria ser `GetUserFavoritesUseCase`).

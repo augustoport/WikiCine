@@ -34,6 +34,6 @@ Classes `*UseCase` (via `getIt`).
 
 ## Observações técnicas e débitos
 - **[Violação R4]** Contratos com `Future<dynamic>` vazam JSON para a apresentação.
-- **[Órfão]** `UserRepository` e `GetUserFavoritesUsecases`.
+- **[Órfão]** `UserRepository`.
 - **[Débito]** Casos de uso não contêm regra de negócio (só delegam); regras como "diretor = job Director" e "é favorito?" estão na apresentação (`MovieCubit`).
 - **[Débito]** Não há entidades para créditos/elenco nem para detalhes completos.

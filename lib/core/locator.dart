@@ -2,6 +2,7 @@ import 'package:cinerating/presentation/bloc/profile/profile_cubit.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 
+import '../domain/usecases/user/get_user_favorites_usecases.dart';
 import '../presentation/bloc/home/home_cubit.dart';
 import '../presentation/bloc/movie_detail/movie_cubit.dart';
 import '../presentation/controllers/home_controller.dart';
@@ -99,6 +100,11 @@ void setupLocator() {
 
   getIt.registerFactory<GetTvShowDetailsUseCase>(
     () => GetTvShowDetailsUseCase(getIt<TvRepository>()),
+  );
+
+
+  getIt.registerFactory<GetUserFavoritesUsecases>(
+    () => GetUserFavoritesUsecases(getIt<MovieRepository>()),
   );
 
   // Controllers

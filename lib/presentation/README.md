@@ -26,7 +26,7 @@ HomePage.Drawer ──Exit (pushReplacement)──► LoginPage
 ```
 
 ## Dependências
-- **Internas:** `core/locator.dart`, `core/shared/themes/app_colors.dart`, `domain/usecases/*`, `domain/entities/*`, `domain/repositories/movie_repository.dart` (ProfileCubit), `data/models/*` (violação).
+- **Internas:** `core/locator.dart`, `core/shared/themes/app_colors.dart`, `domain/usecases/*`, `domain/entities/*`, `data/models/*` (violação).
 - **Externas:** `material_ui`, `bloc`, `flutter_bloc`, `cached_network_image`, `intl`, `url_launcher`.
 
 ## Módulos relacionados

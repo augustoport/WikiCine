@@ -14,7 +14,7 @@ Agrupar o que não pertence a uma camada específica: composição de dependênc
   - `AppColors` (singleton);
   - datasources `AuthData`, `MovieData`, `TvData` (lazy singleton);
   - repositórios `AuthRepository → AuthApi(AuthData, FlutterSecureStorage())`, `MovieRepository → MovieApi`, `TvRepository → TvRepositoryImpl` (lazy singleton);
-  - 11 casos de uso (factory);
+  - 12 casos de uso (factory), incluindo `GetUserFavoritesUsecases`;
   - `LoginController` (lazy singleton), `HomeController` (factory);
   - `HomeCubit`, `ProfileCubit`, `MovieCubit` (factory).
 
@@ -42,7 +42,7 @@ Resolução em cadeia, ex.: `getIt<HomeCubit>()` → construtor faz `getIt<GetMo
 
 ## Observações técnicas e débitos
 - **[Violação V6]** `core/` importa `presentation/`; ao mesmo tempo `data/` e `presentation/` importam `core/`. O locator poderia ser movido para fora de `core/` (ex.: `lib/di/`) para quebrar o ciclo conceitual.
-- **[Violação R6]** Não registra `SerieCubit`, `GetUserFavoritesUsecases` nem implementação de `UserRepository`.
+- **[Violação R6]** Não registra `SerieCubit` nem implementação de `UserRepository`.
 - **[Débito]** `AppColors` registrado como instância, mas só possui campos `static`.
 - **[Bug B2]** Por `HomeCubit` ser `registerFactory`, o `getIt<HomeCubit>()` do Drawer cria uma instância desconectada da Home.
 - **[Débito]** `LoginController` é lazy singleton e guarda `TextEditingController`s que nunca são descartados.
