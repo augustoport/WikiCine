@@ -2,7 +2,7 @@
 
 > Documento oficial de produto/negócio, derivado do código-fonte e do `README.md` raiz.
 > Data da análise: 2026-11-13 · commit de referência: `cd8a2ee` (atualizado após a refatoração de conformidade arquitetural).
-> Decisões de produto confirmadas pelo mantenedor em entrevista (2026-11-13) estão na seção 8 e prevalecem sobre qualquer **Hipótese**.
+> Decisões de produto confirmadas pelo mantenedor em entrevistas (2026-11-13, rodadas 1 e 2) estão na seção 8 e prevalecem sobre qualquer **Hipótese**.
 > Inferências estão marcadas como **Hipótese**. Para detalhes técnicos, ver [`ARQUITETURA_DO_SISTEMA.md`](./ARQUITETURA_DO_SISTEMA.md).
 
 ---
@@ -134,6 +134,25 @@ Estas decisões são a **referência oficial** para as próximas especificaçõe
 | D18 | `TOKEN` | É o token de leitura da **conta TMDB pessoal do mantenedor**. | Ver impacto em I1. |
 | D19 | Credenciais expostas | O mantenedor **vai revogar** as credenciais que estão no histórico do Git. | Pendente (ação externa). |
 
+### 8.0 Segunda rodada (resolve P1–P4)
+
+| ID | Tema | Decisão | Situação no código |
+|---|---|---|---|
+| D20 | Modo guest — escopo (P1) | Visitante tem **leitura completa**: Home, busca e detalhes. Não usa sessão guest do TMDB. | Não implementado. |
+| D21 | Modo guest — ações | Para o visitante, favoritar, watchlist, avaliar e o item **Profile** ficam **ocultos**. O menu mostra **"Entrar"**, que leva à tela de login. | Não implementado. |
+| D22 | Entrada no app | Sem sessão, abre a **tela de login** com o botão secundário **"Continuar sem login"**. A escolha de guest **não é lembrada** ao reabrir. | Não implementado. |
+| D23 | Avaliação — escala (P3) | **5 estrelas com meia estrela** (0,5★ a 5★). O valor enviado ao TMDB é o **dobro** (0,5★ = 1, 5★ = 10). | Não implementado. |
+| D24 | Avaliação — remoção e exibição (P3) | O usuário pode **remover** a nota. A nota dele aparece **no detalhe** ("Sua nota", ao lado da média TMDB), numa **lista "Avaliados" no Perfil** e como **selo nos cards** da Home/busca. | Não implementado. |
+| D25 | Settings — conteúdo (P2) | **Idioma**, **tema** (claro/escuro/sistema) e **Sobre** (versão, crédito obrigatório ao TMDB, link do repositório). Conta/logout continuam no menu lateral. | Não implementado. |
+| D26 | Preferências | Na 1ª abertura: idioma do aparelho (pt-BR se português, senão en-US) e tema do sistema. Escolhas salvas no dispositivo. | Não implementado. |
+| D27 | Proxy do TMDB (P4) | Um **proxy em Cloud Functions (Firebase)** guarda `TOKEN` e `API_KEY`. **Android, iOS e Web** chamam o proxy; nenhum app carrega segredos. | Não implementado. |
+| D28 | Login pelo proxy | Mantém usuário/senha (D6) em todas as plataformas. A senha passa pelo proxy por HTTPS e o **corpo das requisições nunca é registrado em log**. A Web exige login igual ao mobile (com guest disponível). | Não implementado. |
+| D29 | Estado da conta | Após o login, baixar **uma vez** favoritos, watchlist e avaliados (filmes e séries) para um **cache em memória**, atualizado a cada ação do usuário. Cards e detalhe consultam esse cache. | Não implementado. |
+| D30 | Navegação | Migrar para **`go_router`** (URLs como `/movie/123`, `/tv/456`, guard central de login/guest). | Não implementado. |
+| D31 | Erros | **Falhas tipadas**: sem conexão, sessão expirada (401 → volta ao login), não encontrado e desconhecido; mensagem traduzida e botão "Tentar de novo". Sem Crashlytics. | Não implementado. |
+| D32 | Home | Manter **discover** (uma lista por aba, por popularidade) com rolagem infinita (D17). Sem seções nem filtros. | Parcial (1ª página). |
+| D33 | Entrega | **CI no GitHub Actions** (`flutter analyze` + `flutter test` em PRs) e **deploy Web automático** no Firebase Hosting ao fazer merge na `master`. Assinatura de release e lojas ficam **fora do escopo** por ora. | Não implementado. |
+
 ### 8.1 Impactos identificados a partir das decisões
 
 | ID | Impacto |
@@ -142,13 +161,21 @@ Estas decisões são a **referência oficial** para as próximas especificaçõe
 | I2 | D13 + D14 exigem que o idioma escolhido seja passado como `language` (formato `pt-BR`/`en-US`) em **todas** as chamadas de catálogo e detalhe, substituindo o valor atual `en-US;pt-BR`. |
 | I3 | D5 depende de validar a sessão ao abrir o app (o fluxo `getCurrentUser` já existe) e de uma tela inicial de carregamento antes de decidir entre Login e Home. |
 | I4 | D15 exige que o `firebase.json` publique o build Web (`build/web`) em vez da pasta `public/`, e que a versão Web lide com CORS e segredos embutidos no JavaScript (o `TOKEN` fica visível no navegador). |
+| I5 | D27 exige o **plano Blaze** (pago por uso) do Firebase para Cloud Functions, e o app deixa de receber segredos via `--dart-define`: passa a receber só a URL do proxy. Resolve S2 e a parte de segredos de I4. O proxy precisa de lista de caminhos permitidos (só os endpoints usados pelo app), CORS restrito ao domínio do Hosting e limite de requisições, para não virar um repasse aberto do token. |
+| I6 | D28: a Cloud Function não pode registrar corpo nem query de `/authentication/*`; os logs padrão do Cloud Functions devem ser revisados. |
+| I7 | D29 substitui a chamada de favoritos ao abrir cada filme (V10). O cache precisa ser limpo no logout, carregar todas as páginas das listas no início (o TMDB devolve 20 itens por página) e ficar vazio para o visitante. |
+| I8 | D24 (selo nos cards) depende de D29; sem o cache, seriam N chamadas por tela. |
+| I9 | D30 + D5 + D22: o guard do `go_router` decide entre Splash → Login → Home (logado ou guest). D21 vira regra do guard (rota `/profile` bloqueada para guest). |
+| I10 | D31: "sessão expirada" precisa limpar a sessão local (como no logout) antes de redirecionar. |
+| I11 | D25: os termos de uso da API do TMDB exigem atribuição (logo e aviso "This product uses the TMDB API but is not endorsed or certified by TMDB"), que fica na seção Sobre. |
 
-## 9. Pendências em aberto
+## 9. Pendências
 
-| ID | Tema | O que falta definir |
+P1–P4 foram resolvidas na segunda rodada (D20–D33). Não há pendências de produto em aberto.
+
+| ID | Tema | Resolvida por |
 |---|---|---|
-| P1 | Modo guest (D7) | Quais telas o visitante acessa; o que acontece ao tocar em favoritar/avaliar/watchlist; como sair do modo guest para o login. |
-| P2 | Tela de configurações (D12) | Lista final de opções (idioma, tema, conta, sobre…). |
-| P3 | Avaliações (D3) | Escala exibida ao usuário (TMDB aceita 0,5 a 10), se é possível remover a nota, e onde exibir a nota do usuário. |
-| P4 | Versão Web (D15) | Como proteger o `TOKEN` na Web (I4); se a Web exige login igual ao mobile. |
-
+| P1 | Modo guest | D20, D21, D22 |
+| P2 | Tela de configurações | D25, D26 |
+| P3 | Avaliações | D23, D24 |
+| P4 | Versão Web | D27, D28 |
