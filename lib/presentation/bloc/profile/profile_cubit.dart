@@ -1,18 +1,19 @@
 import 'package:bloc/bloc.dart';
-import 'package:cinerating/presentation/bloc/profile/profile_states.dart';
 
-import '../../../core/locator.dart';
-import '../../../domain/repositories/movie_repository.dart';
+import '../../../domain/usecases/user/get_user_favorites_usecase.dart';
+import 'profile_states.dart';
 
 class ProfileCubit extends Cubit<ProfileStates> {
-  ProfileCubit() : super(ProfileInitial());
+  ProfileCubit({required GetUserFavoritesUseCase getUserFavoritesUseCase})
+    : _getUserFavoritesUseCase = getUserFavoritesUseCase,
+      super(ProfileInitial());
 
-  final movieApi = getIt<MovieRepository>();
+  final GetUserFavoritesUseCase _getUserFavoritesUseCase;
 
   Future<void> initProfile() async {
     emit(ProfileLoading());
     try {
-      final favorites = await movieApi.getFavoriteMovies();
+      final favorites = await _getUserFavoritesUseCase();
       emit(ProfileSuccess(favorites: favorites, watchlist: []));
     } catch (e) {
       emit(ProfileError());

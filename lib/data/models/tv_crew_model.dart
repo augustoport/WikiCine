@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import '../../core/shared/env.dart';
+import '../../domain/entities/credits.dart';
 
 class TvShowCrew {
   List<Cast>? cast;
@@ -30,6 +31,9 @@ class TvShowCrew {
         : List<Cast>.from(json["crew"]!.map((x) => Cast.fromMap(x))),
     id: json["id"],
   );
+
+  Credits toEntity() =>
+      Credits(cast: (cast ?? []).map((c) => c.toEntity()).toList());
 
   Map<String, dynamic> toMap() => {
     "cast": cast == null ? [] : List<dynamic>.from(cast!.map((x) => x.toMap())),
@@ -123,6 +127,15 @@ class Cast {
         ? []
         : List<Job>.from(json["jobs"]!.map((x) => Job.fromMap(x))),
     department: json["department"],
+  );
+
+  CastMember toEntity() => CastMember(
+    id: id,
+    name: name,
+    character: (roles?.isNotEmpty ?? false) ? roles!.first.character : null,
+    profilePath: profilePath,
+    department: knownForDepartment,
+    job: (jobs?.isNotEmpty ?? false) ? jobs!.first.job : null,
   );
 
   Map<String, dynamic> toMap() => {

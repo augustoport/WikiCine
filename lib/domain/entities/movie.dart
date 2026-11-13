@@ -1,3 +1,5 @@
+import 'genre.dart';
+
 class Movie {
   final int? id;
   final int? runtime;
@@ -7,8 +9,10 @@ class Movie {
   final String? posterPath;
   final String? backdropPath;
   final double? voteAverage;
+  final int? voteCount;
   final DateTime? releaseDate;
   final List<int>? genreIds;
+  final List<Genre>? genres;
 
   Movie({
     this.id,
@@ -19,7 +23,9 @@ class Movie {
     this.posterPath,
     this.backdropPath,
     this.voteAverage,
+    this.voteCount,
     this.releaseDate,
     this.genreIds,
+    this.genres,
   });
 }

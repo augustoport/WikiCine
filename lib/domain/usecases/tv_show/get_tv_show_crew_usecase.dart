@@ -1,3 +1,4 @@
+import '../../entities/credits.dart';
 import '../../repositories/tv_repository.dart';
 
 class GetTvShowCrewUseCase {
@@ -5,7 +6,7 @@ class GetTvShowCrewUseCase {
 
   GetTvShowCrewUseCase(this.tvRepository);
 
-  Future<dynamic> call(String tvShowId) {
-    return tvRepository.getTvShowCrew(tvShowId);
+  Future<Credits> call(String tvShowId) {
+    return tvRepository.getTvShowCredits(tvShowId);
   }
 }

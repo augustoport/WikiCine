@@ -1,8 +1,11 @@
 import 'package:dio/dio.dart';
 
+import '../../../core/shared/env.dart';
+import '../../../domain/entities/credits.dart';
 import '../../../domain/entities/tv_show.dart';
 import '../../models/movie_simple_model.dart';
-import '../../../core/shared/env.dart';
+import '../../models/tv_crew_model.dart';
+import '../../models/tv_show_model.dart';
 import '../data/tv_data.dart';
 
 class TvImplementation implements TvData {
@@ -36,8 +39,13 @@ class TvImplementation implements TvData {
   @override
   Future<TvShow> getTvShowDetails(String tvShowId) async {
     final response = await _dio.get('/tv/$tvShowId');
-    final model = MovieSimpleModel.fromMap(response.data);
-    return _mapToEntity(model);
+    return TvShowModel.fromMap(response.data);
+  }
+
+  @override
+  Future<Credits> getTvShowCredits(String tvShowId) async {
+    final response = await _dio.get('/tv/$tvShowId/aggregate_credits');
+    return TvShowCrew.fromMap(response.data).toEntity();
   }
 
   TvShow _mapToEntity(MovieSimpleModel model) {
@@ -48,20 +56,9 @@ class TvImplementation implements TvData {
       posterPath: model.posterPath,
       backdropPath: model.backdropPath,
       voteAverage: model.voteAverage,
+      voteCount: model.voteCount,
       firstAirDate: model.releaseDate,
       genreIds: model.genreIds,
     );
-  }
-
-  @override
-  Future<dynamic> getTvShowCrew(String tvShowId) async {
-    final response = await _dio.get('/tv/$tvShowId/aggregate_credits');
-    return response.data;
-  }
-
-  @override
-  Future<dynamic> getTvShowDetailsFull(String tvShowId) async {
-    final response = await _dio.get('/tv/$tvShowId');
-    return response.data;
   }
 }

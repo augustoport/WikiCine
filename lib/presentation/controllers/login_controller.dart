@@ -1,8 +1,6 @@
-import 'dart:developer';
 import 'package:material_ui/material_ui.dart';
 
-import '../../../core/locator.dart';
-import '../../../domain/entities/user.dart';
+import '../../domain/entities/user.dart';
 import '../../domain/usecases/user/get_current_user_usecase.dart';
 import '../../domain/usecases/auth/login_usecase.dart';
 import '../../domain/usecases/auth/logout_usecase.dart';
@@ -15,9 +13,17 @@ class LoginController extends ChangeNotifier {
   bool loadingDrawer = false;
   User? currentUser;
 
-  final _loginUseCase = getIt<LoginUseCase>();
-  final _getCurrentUserUseCase = getIt<GetCurrentUserUseCase>();
-  final _logoutUseCase = getIt<LogoutUseCase>();
+  LoginController({
+    required LoginUseCase loginUseCase,
+    required GetCurrentUserUseCase getCurrentUserUseCase,
+    required LogoutUseCase logoutUseCase,
+  }) : _loginUseCase = loginUseCase,
+       _getCurrentUserUseCase = getCurrentUserUseCase,
+       _logoutUseCase = logoutUseCase;
+
+  final LoginUseCase _loginUseCase;
+  final GetCurrentUserUseCase _getCurrentUserUseCase;
+  final LogoutUseCase _logoutUseCase;
 
   Future<bool> login() async {
     isLoading = true;

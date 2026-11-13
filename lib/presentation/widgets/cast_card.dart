@@ -1,16 +1,17 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../domain/entities/credits.dart';
+
 class CastCard extends StatelessWidget {
-  final dynamic actor;
-  final List<dynamic> roles;
-  const CastCard(this.actor, {super.key, required this.roles});
+  final CastMember actor;
+  const CastCard(this.actor, {super.key});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: .start,
       children: [
-        if (actor?.profilePath != null) ...[
+        if (actor.profilePath != null) ...[
           ClipRRect(
             borderRadius: BorderRadius.circular(6),
             child: Container(
@@ -18,7 +19,7 @@ class CastCard extends StatelessWidget {
               width: 70,
               decoration: BoxDecoration(color: Colors.grey.shade400),
               child: Image.network(
-                actor!.profilePath!,
+                actor.profilePath!,
                 fit: BoxFit.cover,
                 loadingBuilder: (context, child, loading) {
                   return loading == null
@@ -50,7 +51,7 @@ class CastCard extends StatelessWidget {
           child: Column(
             children: [
               Text(
-                actor?.name ?? "N/A",
+                actor.name ?? "N/A",
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 12,
@@ -58,16 +59,9 @@ class CastCard extends StatelessWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
-              if (roles.isNotEmpty)
+              if (actor.character != null)
                 Text(
-                  "as ${roles.first.character}",
-                  style: TextStyle(color: Colors.white, fontSize: 10),
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                ),
-              if (roles.isEmpty)
-                Text(
-                  "as ${actor?.character}",
+                  "as ${actor.character}",
                   style: TextStyle(color: Colors.white, fontSize: 10),
                   textAlign: TextAlign.center,
                   maxLines: 2,

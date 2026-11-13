@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:cinerating/core/shared/env.dart';
 
+import '../../domain/entities/credits.dart';
+
 class CrewModel {
   bool? adult;
   int? gender;
@@ -83,6 +85,15 @@ class CrewModel {
     character: json["character"],
     creditId: json["credit_id"],
     order: json["order"],
+  );
+
+  CastMember toEntity() => CastMember(
+    id: id,
+    name: name,
+    character: character,
+    profilePath: profilePath,
+    department: knownForDepartment,
+    job: job,
   );
 
   Map<String, dynamic> toMap() => {

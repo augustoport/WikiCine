@@ -8,8 +8,8 @@ class MovieLoading extends MovieStates {}
 
 class MovieSuccess extends MovieStates {
   final Movie movieDetail;
-  final List<CrewModel> cast;
-  final CrewModel director;
+  final List<CastMember> cast;
+  final CastMember? director;
   final bool isFavorite;
 
   MovieSuccess(this.movieDetail, this.cast, this.director, this.isFavorite);

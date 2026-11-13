@@ -9,8 +9,8 @@ class SerieLoading extends SerieState {}
 class SerieSuccess extends SerieState {
   SerieSuccess(this.tvShow, this.cast);
 
-  TvShowModel tvShow;
-  List<Cast>? cast;
+  final TvShow tvShow;
+  final List<CastMember> cast;
 }
 
 class SerieError extends SerieState {}

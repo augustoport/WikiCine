@@ -1,3 +1,4 @@
+import '../../entities/tv_show.dart';
 import '../../repositories/tv_repository.dart';
 
 class GetTvShowDetailsUseCase {
@@ -5,7 +6,7 @@ class GetTvShowDetailsUseCase {
 
   GetTvShowDetailsUseCase(this.tvRepository);
 
-  Future<dynamic> call(String tvShowId) {
-    return tvRepository.getTvShowDetailsFull(tvShowId);
+  Future<TvShow> call(String tvShowId) {
+    return tvRepository.getTvShowDetails(tvShowId);
   }
 }

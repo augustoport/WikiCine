@@ -1,13 +1,14 @@
 import 'dart:convert';
 
 import '../../core/shared/env.dart';
+import '../../domain/entities/genre.dart';
 import '../../domain/entities/tv_show.dart';
+import 'genre_model.dart';
 
 class TvShowModel extends TvShow {
   bool? adult;
   List<CreatedBy>? createdBy;
   List<int>? episodeRunTime;
-  List<Genre>? genres;
   String? homepage;
   bool? inProduction;
   List<String>? languages;
@@ -28,7 +29,6 @@ class TvShowModel extends TvShow {
   String? status;
   String? tagline;
   String? type;
-  int? voteCount;
 
   TvShowModel({
     super.overview,
@@ -41,7 +41,7 @@ class TvShowModel extends TvShow {
     this.adult,
     this.createdBy,
     this.episodeRunTime,
-    this.genres,
+    super.genres,
     this.homepage,
     this.inProduction,
     this.languages,
@@ -62,7 +62,7 @@ class TvShowModel extends TvShow {
     this.status,
     this.tagline,
     this.type,
-    this.voteCount,
+    super.voteCount,
   });
 
   TvShowModel copyWith({
@@ -156,7 +156,9 @@ class TvShowModel extends TvShow {
         : DateTime.parse(json["first_air_date"]),
     genres: json["genres"] == null
         ? []
-        : List<Genre>.from(json["genres"]!.map((x) => Genre.fromMap(x))),
+        : List<GenreModel>.from(
+            json["genres"]!.map((x) => GenreModel.fromMap(x)),
+          ),
     homepage: json["homepage"],
     id: json["id"],
     inProduction: json["in_production"],
@@ -226,7 +228,7 @@ class TvShowModel extends TvShow {
         "${firstAirDate!.year.toString().padLeft(4, '0')}-${firstAirDate!.month.toString().padLeft(2, '0')}-${firstAirDate!.day.toString().padLeft(2, '0')}",
     "genres": genres == null
         ? []
-        : List<dynamic>.from(genres!.map((x) => x.toMap())),
+        : List<dynamic>.from(genres!.map(GenreModel.toMap)),
     "homepage": homepage,
     "id": id,
     "in_production": inProduction,
@@ -315,24 +317,6 @@ class CreatedBy {
   };
 }
 
-class Genre {
-  int? id;
-  String? name;
-
-  Genre({this.id, this.name});
-
-  Genre copyWith({int? id, String? name}) =>
-      Genre(id: id ?? this.id, name: name ?? this.name);
-
-  factory Genre.fromJson(String str) => Genre.fromMap(json.decode(str));
-
-  String toJson() => json.encode(toMap());
-
-  factory Genre.fromMap(Map<String, dynamic> json) =>
-      Genre(id: json["id"], name: json["name"]);
-
-  Map<String, dynamic> toMap() => {"id": id, "name": name};
-}
 
 class LastEpisodeToAir {
   int? id;

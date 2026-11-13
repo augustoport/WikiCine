@@ -1,3 +1,5 @@
+import 'genre.dart';
+
 class TvShow {
   final int? id;
   final String? name;
@@ -5,8 +7,10 @@ class TvShow {
   final String? posterPath;
   final String? backdropPath;
   final double? voteAverage;
+  final int? voteCount;
   final DateTime? firstAirDate;
   final List<int>? genreIds;
+  final List<Genre>? genres;
 
   TvShow({
     required this.id,
@@ -15,7 +19,9 @@ class TvShow {
     this.posterPath,
     this.backdropPath,
     this.voteAverage,
+    this.voteCount,
     this.firstAirDate,
     this.genreIds,
+    this.genres,
   });
 }

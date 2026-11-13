@@ -1,3 +1,4 @@
+import '../../domain/entities/credits.dart';
 import '../../domain/entities/movie.dart';
 import '../../domain/repositories/movie_repository.dart';
 import '../datasources/data/movie_data.dart';
@@ -8,32 +9,17 @@ class MovieApi implements MovieRepository {
   MovieApi(this.movieData);
 
   @override
-  Future<List<Movie>> getMovies() {
-    return movieData.getMovies();
-  }
+  Future<List<Movie>> getMovies() => movieData.getMovies();
 
   @override
-  Future<List<Movie>> searchMovies(String query) {
-    return movieData.searchMovies(query);
-  }
+  Future<List<Movie>> searchMovies(String query) =>
+      movieData.searchMovies(query);
 
   @override
-  Future<Movie> getMovieDetails(String movieId) {
-    return movieData.getMovieDetails(movieId);
-  }
+  Future<Movie> getMovieDetails(String movieId) =>
+      movieData.getMovieDetails(movieId);
 
   @override
-  Future<dynamic> getMovieCrew(String movieId) {
-    return movieData.getMovieCrew(movieId);
-  }
-
-  @override
-  Future<dynamic> getMovieDetailsFull(String movieId) {
-    return movieData.getMovieDetailsFull(movieId);
-  }
-
-  @override
-  Future<List<Movie>> getFavoriteMovies() {
-    return movieData.getFavoriteMovies();
-  }
+  Future<Credits> getMovieCredits(String movieId) =>
+      movieData.getMovieCredits(movieId);
 }

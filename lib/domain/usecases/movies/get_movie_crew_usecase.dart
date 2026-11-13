@@ -1,3 +1,4 @@
+import '../../entities/credits.dart';
 import '../../repositories/movie_repository.dart';
 
 class GetMovieCrewUseCase {
@@ -5,7 +6,12 @@ class GetMovieCrewUseCase {
 
   GetMovieCrewUseCase(this.movieRepository);
 
-  Future<dynamic> call(String movieId) {
-    return movieRepository.getMovieCrew(movieId);
+  /// Retorna o elenco (apenas atores, departamento "Acting") e o diretor.
+  Future<Credits> call(String movieId) async {
+    final credits = await movieRepository.getMovieCredits(movieId);
+    return Credits(
+      cast: credits.cast.where((c) => c.department == 'Acting').toList(),
+      director: credits.director,
+    );
   }
 }

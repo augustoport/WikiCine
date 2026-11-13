@@ -9,7 +9,6 @@ class MovieSimpleModel extends Movie {
   String? originalTitle;
   double? popularity;
   bool? video;
-  int? voteCount;
 
   MovieSimpleModel({
     super.backdropPath,
@@ -26,7 +25,7 @@ class MovieSimpleModel extends Movie {
     this.originalTitle,
     this.popularity,
     this.video,
-    this.voteCount,
+    super.voteCount,
   });
 
   MovieSimpleModel copyWith({
