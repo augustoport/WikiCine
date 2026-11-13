@@ -103,5 +103,5 @@ Segundo o `README.md` raiz, trata-se de um **projeto de portfólio** que demonst
 | Ambientes | Um único (`Environment.production`). |
 | Idioma | Interface mista português/inglês; dados do TMDB em inglês por padrão (**Hipótese**, ver S10 na arquitetura). |
 | Observabilidade | Nenhuma (sem logs, crash reporting ou analytics ativos). |
-| Testes / CI | Inexistentes. |
+| Testes / CI | Testes unitários (casos de uso), de widget e de integração (`flutter test`, `flutter test integration_test`). Sem CI. |
 | Limites externos | Sujeito às regras de uso e limites de requisição do TMDB (**Hipótese** quanto aos valores exatos). |

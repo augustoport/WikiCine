@@ -43,7 +43,7 @@ class ContentList extends StatelessWidget {
                   ),
                   child: MovieCard(
                     photo: show.posterPath,
-                    title: show.title ?? show.name,
+                    title: type == "movie" ? show.title : show.name,
                     vote: (show.voteAverage ?? 0).toStringAsFixed(1),
                   ),
                 );
