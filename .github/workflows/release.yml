@@ -97,7 +97,7 @@ jobs:
         run: rm -f android/app/upload-keystore.jks android/key.properties
 
       - name: Publish GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           name: WikiCine ${{ steps.version.outputs.name }}
           generate_release_notes: true
