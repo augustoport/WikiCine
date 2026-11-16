@@ -13,7 +13,7 @@ Renderização; idealmente sem lógica de negócio nem navegação.
 |---|---|---|---|
 | `content_list.dart` | `ContentList(onRefresh, content, type)` | `HomePage` | Grid de 2 colunas com `RefreshIndicator`; o tap navega para o detalhe do filme ou da série conforme `type`. |
 | `movie_card.dart` | `MovieCard(photo, title, vote)` | `ContentList` | Card com pôster (`CachedNetworkImage`), título e nota. |
-| `content_detail.dart` | `ContentDetail(content, type, cast: List<CastMember>, director: CastMember?, isFavorite, onFavoriteTap)` e `ContentCreditWidget(cast, director)` | `MovieDetailPage`, `TvShowDetailPage` | Backdrop, pôster, título, ícone de favorito, nota/votos, data, duração, gêneros, sinopse, elenco e diretor (se houver). |
+| `content_detail.dart` | `ContentDetail(content, type, cast: List<CastMember>, director: CastMember?, isFavorite, favorite: ValueListenable<bool>?, onFavoriteTap, showFavorite)` e `ContentCreditWidget(cast, director)` | `MovieDetailPage`, `TvShowDetailPage` | Backdrop, pôster, título, ícone de favorito, nota/votos, data, duração, gêneros, sinopse, elenco e diretor (se houver). |
 | `cast_card.dart` | `CastCard(CastMember actor)` | `ContentCreditWidget` | Foto, nome e personagem (`as <character>`, só se houver). |
 | `navigation_blur.dart` | `NavigationBlur(options)` | `HomePage` | Container com desfoque (`BackdropFilter`). |
 | `session_card.dart` | `SessionCard(icon, session, onTap, active)` | `HomePage` | Botão da barra inferior (Movie/TV). |
@@ -37,7 +37,7 @@ Construtores dos widgets.
 
 ## Observações técnicas e débitos
 - **[Bug B3]** `DateFormat.format(content.releaseDate)` sem fallback para filmes com data nula (teste correspondente marcado como `skip` em `test/presentation/widgets/content_detail_test.dart`).
-- O coração usa `onFavoriteTap`; sem callback (detalhe de série) ele só indica o estado e não reage ao toque.
+- Coração: `showFavorite: false` esconde (visitante). Com `favorite` informado, o ícone fica num `ListenableBuilder` e só ele reconstrói quando o valor muda; sem `favorite`, usa o `isFavorite` fixo (séries). Sem `onFavoriteTap`, não reage ao toque.
 - **[Violação V7]** `ContentList` importa páginas e navega; deveria receber um callback `onTap`.
 - **[Violação V8]** `ContentDetail.content` e `ContentList.content` ainda são `dynamic` (filme ou série).
 - **[Débito]** `ContentDetail` usa `ListView.builder(itemCount: 1)` em vez de `SingleChildScrollView`.

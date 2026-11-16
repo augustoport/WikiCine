@@ -14,7 +14,7 @@ Agrupar o que não pertence a uma camada específica: composição de dependênc
   - `FlutterSecureStorage` (lazy singleton, instância única);
   - datasources `AuthData`, `MovieData`, `TvData`, `UserData` (lazy singleton);
   - repositórios `AuthRepository → AuthApi`, `MovieRepository → MovieApi`, `TvRepository → TvRepositoryImpl`, `UserRepository → UserApi` (lazy singleton);
-  - 13 casos de uso (factory);
+  - 14 casos de uso (factory);
   - `LoginController` (lazy singleton), `HomeController` (factory);
   - `HomeCubit`, `MovieCubit`, `SerieCubit`, `ProfileCubit` (factory), todos com casos de uso injetados.
 

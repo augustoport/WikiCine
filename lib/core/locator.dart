@@ -17,6 +17,7 @@ import '../domain/repositories/auth_repository.dart';
 import '../domain/repositories/movie_repository.dart';
 import '../domain/repositories/tv_repository.dart';
 import '../domain/repositories/user_repository.dart';
+import '../domain/usecases/auth/is_logged_in_usecase.dart';
 import '../domain/usecases/auth/login_usecase.dart';
 import '../domain/usecases/auth/logout_usecase.dart';
 import '../domain/usecases/movies/get_movie_crew_usecase.dart';
@@ -72,6 +73,7 @@ void setupLocator() {
   // Use Cases
   getIt.registerFactory(() => LoginUseCase(getIt<AuthRepository>()));
   getIt.registerFactory(() => LogoutUseCase(getIt<AuthRepository>()));
+  getIt.registerFactory(() => IsLoggedInUseCase(getIt<AuthRepository>()));
   getIt.registerFactory(() => GetCurrentUserUseCase(getIt<AuthRepository>()));
   getIt.registerFactory(() => GetUserFavoritesUseCase(getIt<UserRepository>()));
   getIt.registerFactory(() => SetMovieFavoriteUseCase(getIt<UserRepository>()));
@@ -109,6 +111,7 @@ void setupLocator() {
       getMovieCrewUseCase: getIt<GetMovieCrewUseCase>(),
       getUserFavoritesUseCase: getIt<GetUserFavoritesUseCase>(),
       setMovieFavoriteUseCase: getIt<SetMovieFavoriteUseCase>(),
+      isLoggedInUseCase: getIt<IsLoggedInUseCase>(),
     ),
   );
   getIt.registerFactory<SerieCubit>(

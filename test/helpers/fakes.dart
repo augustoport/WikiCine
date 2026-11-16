@@ -68,6 +68,13 @@ class FakeAuthRepository extends _FakeRepository implements AuthRepository {
     await record('logout');
     currentUser = null;
   }
+
+  /// Logado quando há [currentUser] (após `login` ou definido no teste).
+  @override
+  Future<bool> isLoggedIn() async {
+    await record('isLoggedIn');
+    return currentUser != null;
+  }
 }
 
 class FakeMovieRepository extends _FakeRepository implements MovieRepository {
