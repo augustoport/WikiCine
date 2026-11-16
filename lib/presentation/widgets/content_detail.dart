@@ -11,6 +11,7 @@ class ContentDetail extends StatelessWidget {
   final List<CastMember> cast;
   final CastMember? director;
   final String type;
+
   /// Estado fixo do coração, usado quando [favorite] é `null` (ex.: séries).
   final bool? isFavorite;
 

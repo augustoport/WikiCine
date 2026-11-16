@@ -48,7 +48,10 @@ class FakeAuthRepository extends _FakeRepository implements AuthRepository {
   User? currentUser;
 
   @override
-  Future<User> login({required String username, required String password}) async {
+  Future<User> login({
+    required String username,
+    required String password,
+  }) async {
     await record('login', username);
     if (username != validUsername || password != validPassword) {
       throw FakeRepositoryException('login');
@@ -100,7 +103,8 @@ class FakeMovieRepository extends _FakeRepository implements MovieRepository {
   @override
   Future<Movie> getMovieDetails(String movieId) async {
     await record('getMovieDetails', movieId);
-    return details[movieId] ?? movies.firstWhere((m) => m.id.toString() == movieId);
+    return details[movieId] ??
+        movies.firstWhere((m) => m.id.toString() == movieId);
   }
 
   @override

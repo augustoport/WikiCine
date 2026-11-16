@@ -68,7 +68,9 @@ void main() {
   group('SetMovieFavoriteUseCase', () {
     late FakeUserRepository repository;
 
-    setUp(() => repository = FakeUserRepository()..favorites = [Fixtures.movieA]);
+    setUp(
+      () => repository = FakeUserRepository()..favorites = [Fixtures.movieA],
+    );
 
     test('adiciona o filme aos favoritos (favorite: true)', () async {
       await SetMovieFavoriteUseCase(repository)(2, favorite: true);

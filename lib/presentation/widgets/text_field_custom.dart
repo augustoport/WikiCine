@@ -17,7 +17,8 @@ class TextFieldCustom extends StatefulWidget {
     required this.onChanged,
     this.isPassword,
     this.padding,
-    this.margin, this.backgroundColor,
+    this.margin,
+    this.backgroundColor,
   });
 
   @override
@@ -57,9 +58,7 @@ class _TextFieldCustomState extends State<TextFieldCustom> {
                   obscureText = !obscureText;
                 });
               },
-              icon: Icon(
-                obscureText ? Icons.visibility : Icons.visibility_off,
-              ),
+              icon: Icon(obscureText ? Icons.visibility : Icons.visibility_off),
             ),
           ],
         ],

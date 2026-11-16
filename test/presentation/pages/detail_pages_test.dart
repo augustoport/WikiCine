@@ -30,7 +30,9 @@ void main() {
     Finder toast(String text) =>
         find.descendant(of: find.byType(SnackBar), matching: find.text(text));
 
-    testWidgets('carrega detalhes, créditos e favoritos do filme', (tester) async {
+    testWidgets('carrega detalhes, créditos e favoritos do filme', (
+      tester,
+    ) async {
       await pumpMovie(tester, '1');
 
       expect(deps.movies.calls, ['getMovieDetails:1', 'getMovieCredits:1']);
@@ -50,7 +52,9 @@ void main() {
       expect(find.text('Christopher Nolan'), findsOneWidget);
     });
 
-    testWidgets('coração preenchido quando o id está na lista de favoritos', (tester) async {
+    testWidgets('coração preenchido quando o id está na lista de favoritos', (
+      tester,
+    ) async {
       deps.user.favorites = [Fixtures.movieA];
 
       await pumpMovie(tester, '1');
@@ -59,7 +63,9 @@ void main() {
       expect(find.byIcon(Icons.favorite_border), findsNothing);
     });
 
-    testWidgets('coração vazado quando o id não está na lista de favoritos', (tester) async {
+    testWidgets('coração vazado quando o id não está na lista de favoritos', (
+      tester,
+    ) async {
       deps.user.favorites = [Fixtures.movieA];
 
       await pumpMovie(tester, '2');
@@ -68,7 +74,9 @@ void main() {
       expect(find.byIcon(Icons.favorite), findsNothing);
     });
 
-    testWidgets('falha ao buscar favoritos não impede exibir o filme', (tester) async {
+    testWidgets('falha ao buscar favoritos não impede exibir o filme', (
+      tester,
+    ) async {
       deps.user.failing.add('getUserMovieFavorites');
 
       await pumpMovie(tester, '1');
@@ -90,37 +98,55 @@ void main() {
       });
     });
 
-    testWidgets('tocar no coração vazado adiciona, preenche o coração e mostra toast verde', (tester) async {
-      deps.user.favorites = [Fixtures.movieA];
-      await pumpMovie(tester, '2');
+    testWidgets(
+      'tocar no coração vazado adiciona, preenche o coração e mostra toast verde',
+      (tester) async {
+        deps.user.favorites = [Fixtures.movieA];
+        await pumpMovie(tester, '2');
 
-      await tester.tap(find.byIcon(Icons.favorite_border));
-      await tester.pump(); // conclui o caso de uso e o ListenableBuilder
-      await tester.pump(); // anima a entrada do SnackBar
+        await tester.tap(find.byIcon(Icons.favorite_border));
+        await tester.pump(); // conclui o caso de uso e o ListenableBuilder
+        await tester.pump(); // anima a entrada do SnackBar
 
-      expect(deps.user.calls, ['getUserMovieFavorites', 'setMovieFavorite:2:true']);
-      expect(deps.user.favorites.map((m) => m.id), contains(2));
-      expect(find.byIcon(Icons.favorite), findsOneWidget);
-      expect(find.byIcon(Icons.favorite_border), findsNothing);
-      expect(toast('Adicionado com sucesso'), findsOneWidget);
-      expect(tester.widget<SnackBar>(find.byType(SnackBar)).backgroundColor, Colors.green);
-    });
+        expect(deps.user.calls, [
+          'getUserMovieFavorites',
+          'setMovieFavorite:2:true',
+        ]);
+        expect(deps.user.favorites.map((m) => m.id), contains(2));
+        expect(find.byIcon(Icons.favorite), findsOneWidget);
+        expect(find.byIcon(Icons.favorite_border), findsNothing);
+        expect(toast('Adicionado com sucesso'), findsOneWidget);
+        expect(
+          tester.widget<SnackBar>(find.byType(SnackBar)).backgroundColor,
+          Colors.green,
+        );
+      },
+    );
 
-    testWidgets('tocar no coração preenchido remove, esvazia o coração e mostra toast verde', (tester) async {
-      deps.user.favorites = [Fixtures.movieA];
-      await pumpMovie(tester, '1');
+    testWidgets(
+      'tocar no coração preenchido remove, esvazia o coração e mostra toast verde',
+      (tester) async {
+        deps.user.favorites = [Fixtures.movieA];
+        await pumpMovie(tester, '1');
 
-      await tester.tap(find.byIcon(Icons.favorite));
-      await tester.pump();
-      await tester.pump();
+        await tester.tap(find.byIcon(Icons.favorite));
+        await tester.pump();
+        await tester.pump();
 
-      expect(deps.user.calls, ['getUserMovieFavorites', 'setMovieFavorite:1:false']);
-      expect(deps.user.favorites.map((m) => m.id), isNot(contains(1)));
-      expect(find.byIcon(Icons.favorite_border), findsOneWidget);
-      expect(find.byIcon(Icons.favorite), findsNothing);
-      expect(toast('Removido com sucesso'), findsOneWidget);
-      expect(tester.widget<SnackBar>(find.byType(SnackBar)).backgroundColor, Colors.green);
-    });
+        expect(deps.user.calls, [
+          'getUserMovieFavorites',
+          'setMovieFavorite:1:false',
+        ]);
+        expect(deps.user.favorites.map((m) => m.id), isNot(contains(1)));
+        expect(find.byIcon(Icons.favorite_border), findsOneWidget);
+        expect(find.byIcon(Icons.favorite), findsNothing);
+        expect(toast('Removido com sucesso'), findsOneWidget);
+        expect(
+          tester.widget<SnackBar>(find.byType(SnackBar)).backgroundColor,
+          Colors.green,
+        );
+      },
+    );
 
     testWidgets('favoritar não recarrega a tela (sem loading)', (tester) async {
       await pumpMovie(tester, '2');
@@ -132,32 +158,50 @@ void main() {
       expect(deps.movies.calls, ['getMovieDetails:2', 'getMovieCredits:2']);
     });
 
-    testWidgets('falha ao adicionar mantém o coração vazado e mostra toast vermelho', (tester) async {
-      deps.user.failing.add('setMovieFavorite');
-      await pumpMovie(tester, '2');
+    testWidgets(
+      'falha ao adicionar mantém o coração vazado e mostra toast vermelho',
+      (tester) async {
+        deps.user.failing.add('setMovieFavorite');
+        await pumpMovie(tester, '2');
 
-      await tester.tap(find.byIcon(Icons.favorite_border));
-      await tester.pump();
-      await tester.pump();
+        await tester.tap(find.byIcon(Icons.favorite_border));
+        await tester.pump();
+        await tester.pump();
 
-      expect(find.byIcon(Icons.favorite_border), findsOneWidget);
-      expect(toast('Não foi possível adicionar o filme aos favoritos'), findsOneWidget);
-      expect(tester.widget<SnackBar>(find.byType(SnackBar)).backgroundColor, Colors.red);
-    });
+        expect(find.byIcon(Icons.favorite_border), findsOneWidget);
+        expect(
+          toast('Não foi possível adicionar o filme aos favoritos'),
+          findsOneWidget,
+        );
+        expect(
+          tester.widget<SnackBar>(find.byType(SnackBar)).backgroundColor,
+          Colors.red,
+        );
+      },
+    );
 
-    testWidgets('falha ao remover mantém o coração preenchido e mostra toast vermelho', (tester) async {
-      deps.user.favorites = [Fixtures.movieA];
-      deps.user.failing.add('setMovieFavorite');
-      await pumpMovie(tester, '1');
+    testWidgets(
+      'falha ao remover mantém o coração preenchido e mostra toast vermelho',
+      (tester) async {
+        deps.user.favorites = [Fixtures.movieA];
+        deps.user.failing.add('setMovieFavorite');
+        await pumpMovie(tester, '1');
 
-      await tester.tap(find.byIcon(Icons.favorite));
-      await tester.pump();
-      await tester.pump();
+        await tester.tap(find.byIcon(Icons.favorite));
+        await tester.pump();
+        await tester.pump();
 
-      expect(find.byIcon(Icons.favorite), findsOneWidget);
-      expect(toast('Não foi possível remover o filme dos favoritos'), findsOneWidget);
-      expect(tester.widget<SnackBar>(find.byType(SnackBar)).backgroundColor, Colors.red);
-    });
+        expect(find.byIcon(Icons.favorite), findsOneWidget);
+        expect(
+          toast('Não foi possível remover o filme dos favoritos'),
+          findsOneWidget,
+        );
+        expect(
+          tester.widget<SnackBar>(find.byType(SnackBar)).backgroundColor,
+          Colors.red,
+        );
+      },
+    );
 
     testWidgets('mostra "Error" quando os detalhes falham', (tester) async {
       deps.movies.failing.add('getMovieDetails');
@@ -192,16 +236,23 @@ void main() {
       expect(find.text('Matthew McConaughey'), findsOneWidget);
     });
 
-    testWidgets('série não exibe duração nem consulta favoritos', (tester) async {
+    testWidgets('série não exibe duração nem consulta favoritos', (
+      tester,
+    ) async {
       await pumpTv(tester, '10');
 
       expect(find.text('- min'), findsOneWidget);
       expect(deps.user.calls, isEmpty);
     });
 
-    testWidgets('não exibe diretor mesmo que os créditos tragam um', (tester) async {
+    testWidgets('não exibe diretor mesmo que os créditos tragam um', (
+      tester,
+    ) async {
       // SerieSuccess só carrega o elenco; a página não repassa `director`.
-      deps.tv.credits = const Credits(cast: [Fixtures.actor], director: Fixtures.director);
+      deps.tv.credits = const Credits(
+        cast: [Fixtures.actor],
+        director: Fixtures.director,
+      );
 
       await pumpTv(tester, '10');
 

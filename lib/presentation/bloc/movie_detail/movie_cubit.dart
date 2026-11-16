@@ -44,7 +44,14 @@ class MovieCubit extends Cubit<MovieStates> {
       final credits = await _getMovieCrewUseCase(movieId);
       final loggedIn = await _isLoggedIn();
       isFavorite.value = loggedIn && await _isInFavorites(movie);
-      emit(MovieSuccess(movie, credits.cast, credits.director, canFavorite: loggedIn));
+      emit(
+        MovieSuccess(
+          movie,
+          credits.cast,
+          credits.director,
+          canFavorite: loggedIn,
+        ),
+      );
     } catch (e) {
       emit(MovieError());
     }

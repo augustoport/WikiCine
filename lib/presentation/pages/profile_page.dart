@@ -120,7 +120,10 @@ class Favorites extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Favorites', style: TextStyle(fontSize: 20, color: Colors.white)),
+          Text(
+            'Favorites',
+            style: TextStyle(fontSize: 20, color: Colors.white),
+          ),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -128,7 +131,13 @@ class Favorites extends StatelessWidget {
               children: List.generate(favorites.length, (i) {
                 final fav = favorites[i];
                 return InkWell(
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MovieDetailPage(movieId: fav.id.toString()))),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          MovieDetailPage(movieId: fav.id.toString()),
+                    ),
+                  ),
                   child: Container(
                     padding: EdgeInsets.all(8),
                     width: size.width * 0.3,

@@ -44,7 +44,10 @@ void main() {
     test('propaga falha do repositório', () {
       repository.failing.add('logout');
 
-      expect(LogoutUseCase(repository).call, throwsA(isA<FakeRepositoryException>()));
+      expect(
+        LogoutUseCase(repository).call,
+        throwsA(isA<FakeRepositoryException>()),
+      );
     });
   });
 

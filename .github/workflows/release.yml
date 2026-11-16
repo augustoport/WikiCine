@@ -1,0 +1,105 @@
+name: Release
+
+# Publishing a version: push a tag like v1.2.0
+#   git tag v1.2.0 && git push origin v1.2.0
+on:
+  push:
+    tags: ["v*.*.*"]
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write # create the GitHub Release
+
+env:
+  FLUTTER_VERSION: "3.50.0"
+
+jobs:
+  release-android:
+    name: Build & publish Android release
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Unit & widget tests
+        run: flutter test
+
+      - name: Version from tag
+        id: version
+        run: |
+          name="${GITHUB_REF_NAME#v}"
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          echo "number=${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up release signing
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::warning::ANDROID_KEYSTORE_BASE64 not set: the release will be signed with the debug key."
+            exit 0
+          fi
+          echo "$KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
+          {
+            echo "storeFile=upload-keystore.jks"
+            echo "storePassword=$KEYSTORE_PASSWORD"
+            echo "keyAlias=$KEY_ALIAS"
+            echo "keyPassword=$KEY_PASSWORD"
+          } > android/key.properties
+
+      - name: Build APK and App Bundle
+        env:
+          TMDB_TOKEN: ${{ secrets.TMDB_TOKEN }}
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+          BUILD_NAME: ${{ steps.version.outputs.name }}
+          BUILD_NUMBER: ${{ steps.version.outputs.number }}
+        run: |
+          if [ -z "$TMDB_TOKEN" ] || [ -z "$TMDB_API_KEY" ]; then
+            echo "::error::TMDB_TOKEN and TMDB_API_KEY secrets are required for a release."
+            exit 1
+          fi
+          for target in apk appbundle; do
+            flutter build "$target" --release \
+              --build-name="$BUILD_NAME" --build-number="$BUILD_NUMBER" \
+              --dart-define=TOKEN="$TMDB_TOKEN" \
+              --dart-define=API_KEY="$TMDB_API_KEY"
+          done
+          mkdir -p dist
+          cp build/app/outputs/flutter-apk/app-release.apk "dist/wikicine-$BUILD_NAME.apk"
+          cp build/app/outputs/bundle/release/app-release.aab "dist/wikicine-$BUILD_NAME.aab"
+
+      - name: Remove signing material
+        if: always()
+        run: rm -f android/app/upload-keystore.jks android/key.properties
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: WikiCine ${{ steps.version.outputs.name }}
+          generate_release_notes: true
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          files: dist/*

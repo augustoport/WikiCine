@@ -12,10 +12,14 @@ class UserModel extends User {
 
   factory UserModel.fromJson(Map<String, dynamic> json, String sessionId) {
     return UserModel(
-      id: json['id'] is int ? json['id'] : int.tryParse(json['id']?.toString() ?? ''),
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id']?.toString() ?? ''),
       username: json['username']?.toString(),
       name: json['name']?.toString() ?? json['username']?.toString(),
-      avatar: json['avatar'] is Map ? AvatarModel.fromJson(json['avatar']) : null,
+      avatar: json['avatar'] is Map
+          ? AvatarModel.fromJson(json['avatar'])
+          : null,
       sessionId: sessionId,
     );
   }
@@ -26,10 +30,7 @@ class UserModel extends User {
       'username': username,
       'name': name,
       'avatar': avatar != null
-          ? AvatarModel(
-              gravatar: avatar!.gravatar,
-              tmdb: avatar!.tmdb,
-            ).toJson()
+          ? AvatarModel(gravatar: avatar!.gravatar, tmdb: avatar!.tmdb).toJson()
           : null,
       'sessionId': sessionId,
     };

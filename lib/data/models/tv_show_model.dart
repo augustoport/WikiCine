@@ -317,7 +317,6 @@ class CreatedBy {
   };
 }
 
-
 class LastEpisodeToAir {
   int? id;
   String? name;

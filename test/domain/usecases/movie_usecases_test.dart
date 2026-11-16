@@ -24,7 +24,10 @@ void main() {
     test('propaga falha do repositório', () {
       repository.failing.add('getMovies');
 
-      expect(GetMoviesUseCase(repository).call, throwsA(isA<FakeRepositoryException>()));
+      expect(
+        GetMoviesUseCase(repository).call,
+        throwsA(isA<FakeRepositoryException>()),
+      );
     });
   });
 
@@ -90,7 +93,10 @@ void main() {
 
     test('descarta membros sem departamento', () async {
       repository.credits = const Credits(
-        cast: [CastMember(name: 'Sem departamento'), Fixtures.actor],
+        cast: [
+          CastMember(name: 'Sem departamento'),
+          Fixtures.actor,
+        ],
       );
 
       final credits = await GetMovieCrewUseCase(repository)('1');
