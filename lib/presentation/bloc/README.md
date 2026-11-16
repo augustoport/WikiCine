@@ -14,7 +14,7 @@ Todos os cubits recebem os casos de uso **pelo construtor** e são registrados c
 | Pasta | Cubit | Estados | Casos de uso injetados |
 |---|---|---|---|
 | `home/` | `HomeCubit` — `getMovies()`, `getMovie(q)`, `getTvShows()`, `getTvShow(q)` | `HomeInitial`, `HomeLoading`, `HomeMovie(movies)`, `HomeTv(tvShows)`, `HomeError(message)` | `GetMoviesUseCase`, `SearchMoviesUseCase`, `GetTvShowsUseCase`, `SearchTvShowsUseCase` |
-| `movie_detail/` | `MovieCubit` — `getMovieDetails(id)` | `MovieInitial`, `MovieLoading`, `MovieSuccess(Movie, List<CastMember> cast, CastMember? director, bool isFavorite)`, `MovieError(message)` | `GetMovieDetailsUseCase`, `GetMovieCrewUseCase`, `GetUserFavoritesUseCase` |
+| `movie_detail/` | `MovieCubit` — `getMovieDetails(id)`, `toggleFavorite()` | `MovieInitial`, `MovieLoading`, `MovieSuccess(Movie, List<CastMember> cast, CastMember? director, {bool canFavorite})`; enum `FavoriteResult`, `MovieError(message)` | `GetMovieDetailsUseCase`, `GetMovieCrewUseCase`, `GetUserFavoritesUseCase`, `SetMovieFavoriteUseCase`, `IsLoggedInUseCase` |
 | `serie_detail/` | `SerieCubit` — `getSerieDetail(id)` | `SerieInitial`, `SerieLoading`, `SerieSuccess(TvShow, List<CastMember>)`, `SerieError` | `GetTvShowDetailsUseCase`, `GetTvShowCrewUseCase` |
 | `profile/` | `ProfileCubit` — `initProfile()` | `ProfileInitial`, `ProfileLoading`, `ProfileSuccess(favorites, watchlist)`, `ProfileError` | `GetUserFavoritesUseCase` |
 
@@ -31,7 +31,10 @@ Todos os cubits recebem os casos de uso **pelo construtor** e são registrados c
 `getIt<HomeCubit>()`, `getIt<MovieCubit>()`, `getIt<SerieCubit>()`, `getIt<ProfileCubit>()` (nas pages). Em testes, instanciar direto com casos de uso falsos.
 
 ## Fluxos importantes
-- **MovieCubit:** detalhes (`Movie`) + créditos (`Credits`, só atores) → `isFavorite` = filme está em `GetUserFavoritesUseCase()` (`false` se a busca falhar) → `MovieSuccess`.
+- **MovieCubit:** detalhes (`Movie`) + créditos (`Credits`, só atores) → `IsLoggedInUseCase` → se logado, `isFavorite.value` = filme está em `GetUserFavoritesUseCase()` (`false` se a busca falhar) → `MovieSuccess(canFavorite: logado)`.
+- **`MovieCubit.isFavorite`** é um `ValueNotifier<bool>` escutado pelo coração (`ListenableBuilder`); é descartado em `close()`.
+- **MovieCubit.toggleFavorite:** só age em `MovieSuccess` com `canFavorite` e sem outra atualização em andamento; chama `SetMovieFavoriteUseCase(id, favorite: !isFavorite.value)`. Sucesso → atualiza `isFavorite` e retorna `added`/`removed`; falha → mantém o valor e retorna `addFailed`/`removeFailed`. **Não emite estados** (sem `MovieLoading`). A página usa o `FavoriteResult` para o toast.
+- **[Débito]** O toast usa só o resultado da ação; as falhas tipadas da D31 ainda não existem.
 - **HomeCubit:** busca vazia recai em `getMovies()`/`getTvShows()`.
 
 ## Arquivos críticos

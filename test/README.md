@@ -8,21 +8,22 @@ Abrigar os testes unitários e de widget do app (`flutter test`). O teste de int
 ## Estrutura (espelha `lib/`)
 | Caminho | Tipo | Cobertura |
 |---|---|---|
-| `domain/usecases/auth_usecases_test.dart` | Unitário | `LoginUseCase`, `LogoutUseCase` |
-| `domain/usecases/user_usecases_test.dart` | Unitário | `GetCurrentUserUseCase`, `GetUserFavoritesUseCase` |
+| `domain/usecases/auth_usecases_test.dart` | Unitário | `LoginUseCase`, `LogoutUseCase`, `IsLoggedInUseCase` |
+| `presentation/bloc/movie_cubit_test.dart` | Unitário | `MovieCubit`: `canFavorite` (logado/visitante), `toggleFavorite` (adicionar, remover, falhas, sem `MovieLoading`, toque repetido) |
+| `domain/usecases/user_usecases_test.dart` | Unitário | `GetCurrentUserUseCase`, `GetUserFavoritesUseCase`, `SetMovieFavoriteUseCase` (adicionar, remover, falha) |
 | `domain/usecases/movie_usecases_test.dart` | Unitário | `GetMoviesUseCase`, `SearchMoviesUseCase`, `GetMovieDetailsUseCase`, `GetMovieCrewUseCase` (filtro `Acting` + diretor) |
 | `domain/usecases/tv_show_usecases_test.dart` | Unitário | `GetTvShowsUseCase`, `SearchTvShowsUseCase`, `GetTvShowDetailsUseCase`, `GetTvShowCrewUseCase` |
 | `presentation/pages/login_page_test.dart` | Widget | Campos, senha oculta, validação de vazios, credencial inválida, login → Home |
 | `presentation/pages/home_page_test.dart` | Widget | Lista de filmes, loading, alternância Movie/TV, busca, erros, navegação para detalhes; `DrawerWidget` (nome, sessão, Profile, Exit/logout) |
 | `presentation/pages/profile_page_test.dart` | Widget | Cabeçalho do usuário, favoritos, lista vazia, erro, tap → detalhe, voltar |
-| `presentation/pages/detail_pages_test.dart` | Widget | `MovieDetailPage` (elenco filtrado, diretor, favorito, erros) e `TvShowDetailPage` |
-| `presentation/widgets/content_detail_test.dart` | Widget | `ContentDetail` (filme/série, valores ausentes, favorito) e `CastCard` |
+| `presentation/pages/detail_pages_test.dart` | Widget | `MovieDetailPage` (elenco filtrado, diretor, favorito, visitante sem coração, adicionar/remover com toast verde, falhas com toast vermelho, sem recarga da tela, erros) e `TvShowDetailPage` |
+| `presentation/widgets/content_detail_test.dart` | Widget | `ContentDetail` (filme/série, valores ausentes, favorito, `onFavoriteTap`, `showFavorite`, `ListenableBuilder`) e `CastCard` |
 | `presentation/widgets/content_list_test.dart` | Widget | `ContentList`/`MovieCard`, pull-to-refresh e navegação por tipo |
 
 ### Helpers (`helpers/`)
 | Arquivo | Papel |
 |---|---|
-| `fakes.dart` | Repositórios falsos (`Fake{Auth,Movie,Tv,User}Repository`): registram chamadas em `calls`, falham sob demanda via `failing.add('<método>')` e simulam latência com `delay`. |
+| `fakes.dart` | Repositórios falsos (`Fake{Auth,Movie,Tv,User}Repository`): registram chamadas em `calls`, falham sob demanda via `failing.add('<método>')` e simulam latência com `delay`. `FakeUserRepository.setMovieFavorite` atualiza `favorites` a partir de `catalog`. `FakeAuthRepository.isLoggedIn` é `true` quando há `currentUser` (nos testes de tela de filme, defina `deps.auth.currentUser` para simular usuário logado). |
 | `fixtures.dart` | Entidades de exemplo (usuário, filmes, séries, elenco, diretor). |
 | `test_locator.dart` | `setupTestLocator()` — espelha `setupLocator()` trocando os repositórios por fakes; devolve `TestDeps`. |
 | `fake_image_http.dart` | `FakeImageHttpOverrides` — responde PNG 1x1 a qualquer requisição, para `Image.network` funcionar nos testes. |

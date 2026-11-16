@@ -17,6 +17,7 @@ import '../domain/repositories/auth_repository.dart';
 import '../domain/repositories/movie_repository.dart';
 import '../domain/repositories/tv_repository.dart';
 import '../domain/repositories/user_repository.dart';
+import '../domain/usecases/auth/is_logged_in_usecase.dart';
 import '../domain/usecases/auth/login_usecase.dart';
 import '../domain/usecases/auth/logout_usecase.dart';
 import '../domain/usecases/movies/get_movie_crew_usecase.dart';
@@ -29,6 +30,7 @@ import '../domain/usecases/tv_show/get_tv_shows_usecase.dart';
 import '../domain/usecases/tv_show/search_tv_shows_usecase.dart';
 import '../domain/usecases/user/get_current_user_usecase.dart';
 import '../domain/usecases/user/get_user_favorites_usecase.dart';
+import '../domain/usecases/user/set_movie_favorite_usecase.dart';
 import '../presentation/bloc/home/home_cubit.dart';
 import '../presentation/bloc/movie_detail/movie_cubit.dart';
 import '../presentation/bloc/profile/profile_cubit.dart';
@@ -71,8 +73,10 @@ void setupLocator() {
   // Use Cases
   getIt.registerFactory(() => LoginUseCase(getIt<AuthRepository>()));
   getIt.registerFactory(() => LogoutUseCase(getIt<AuthRepository>()));
+  getIt.registerFactory(() => IsLoggedInUseCase(getIt<AuthRepository>()));
   getIt.registerFactory(() => GetCurrentUserUseCase(getIt<AuthRepository>()));
   getIt.registerFactory(() => GetUserFavoritesUseCase(getIt<UserRepository>()));
+  getIt.registerFactory(() => SetMovieFavoriteUseCase(getIt<UserRepository>()));
   getIt.registerFactory(() => GetMoviesUseCase(getIt<MovieRepository>()));
   getIt.registerFactory(() => SearchMoviesUseCase(getIt<MovieRepository>()));
   getIt.registerFactory(() => GetMovieDetailsUseCase(getIt<MovieRepository>()));
@@ -106,6 +110,8 @@ void setupLocator() {
       getMovieDetailsUseCase: getIt<GetMovieDetailsUseCase>(),
       getMovieCrewUseCase: getIt<GetMovieCrewUseCase>(),
       getUserFavoritesUseCase: getIt<GetUserFavoritesUseCase>(),
+      setMovieFavoriteUseCase: getIt<SetMovieFavoriteUseCase>(),
+      isLoggedInUseCase: getIt<IsLoggedInUseCase>(),
     ),
   );
   getIt.registerFactory<SerieCubit>(

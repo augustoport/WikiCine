@@ -1,4 +1,5 @@
 import 'package:cinerating/presentation/widgets/cast_card.dart';
+import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:intl/intl.dart';
 
@@ -10,7 +11,18 @@ class ContentDetail extends StatelessWidget {
   final List<CastMember> cast;
   final CastMember? director;
   final String type;
+  /// Estado fixo do coração, usado quando [favorite] é `null` (ex.: séries).
   final bool? isFavorite;
+
+  /// Estado do coração vindo do cubit. Quando informado, o ícone é
+  /// reconstruído por um `ListenableBuilder` sempre que o valor muda.
+  final ValueListenable<bool>? favorite;
+
+  /// Toque no coração. Quando `null`, o ícone só indica o estado.
+  final VoidCallback? onFavoriteTap;
+
+  /// `false` esconde o coração (ex.: visitante/guest).
+  final bool showFavorite;
   const ContentDetail({
     super.key,
     required this.content,
@@ -18,6 +30,9 @@ class ContentDetail extends StatelessWidget {
     this.cast = const [],
     this.director,
     this.isFavorite = false,
+    this.favorite,
+    this.onFavoriteTap,
+    this.showFavorite = true,
   });
 
   @override
@@ -129,18 +144,7 @@ class ContentDetail extends StatelessWidget {
                         ),
                       ),
                     ),
-                    InkWell(
-                      enableFeedback: false,
-                      splashColor: Colors.transparent,
-                      onTap: () {},
-                      child: Icon(
-                        isFavorite == true
-                            ? Icons.favorite
-                            : Icons.favorite_border,
-                        color: isFavorite == true ? Colors.red : Colors.white,
-                        size: 25,
-                      ),
-                    ),
+                    if (showFavorite) _favoriteButton(),
                   ],
                 ),
                 SizedBox(height: 5),
@@ -243,6 +247,26 @@ class ContentDetail extends StatelessWidget {
           SizedBox(height: MediaQuery.of(context).padding.bottom + 20),
         ],
       ),
+    );
+  }
+
+  Widget _favoriteButton() {
+    Widget button(bool value) => InkWell(
+      enableFeedback: false,
+      splashColor: Colors.transparent,
+      onTap: onFavoriteTap,
+      child: Icon(
+        value ? Icons.favorite : Icons.favorite_border,
+        color: value ? Colors.red : Colors.white,
+        size: 25,
+      ),
+    );
+
+    final listenable = favorite;
+    if (listenable == null) return button(isFavorite == true);
+    return ListenableBuilder(
+      listenable: listenable,
+      builder: (context, _) => button(listenable.value),
     );
   }
 }

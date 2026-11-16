@@ -5,6 +5,7 @@ import 'package:cinerating/domain/entities/movie.dart';
 import 'package:cinerating/domain/entities/tv_show.dart';
 import 'package:cinerating/presentation/widgets/cast_card.dart';
 import 'package:cinerating/presentation/widgets/content_detail.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -22,6 +23,9 @@ void main() {
       List<CastMember> cast = const [Fixtures.actor],
       CastMember? director = Fixtures.director,
       bool isFavorite = false,
+      VoidCallback? onFavoriteTap,
+      ValueListenable<bool>? favorite,
+      bool showFavorite = true,
     }) async {
       await pumpInScaffold(
         tester,
@@ -31,6 +35,9 @@ void main() {
           cast: cast,
           director: director,
           isFavorite: isFavorite,
+          onFavoriteTap: onFavoriteTap,
+          favorite: favorite,
+          showFavorite: showFavorite,
         ),
       );
       await tester.pumpAndSettle();
@@ -72,6 +79,44 @@ void main() {
 
       final icon = tester.widget<Icon>(find.byIcon(Icons.favorite));
       expect(icon.color, Colors.red);
+      expect(find.byIcon(Icons.favorite_border), findsNothing);
+    });
+
+    testWidgets('tocar no coração chama onFavoriteTap', (tester) async {
+      var taps = 0;
+      await pumpMovie(tester, Fixtures.movieA, onFavoriteTap: () => taps++);
+
+      await tester.tap(find.byIcon(Icons.favorite_border));
+
+      expect(taps, 1);
+    });
+
+    testWidgets('sem onFavoriteTap o coração não reage ao toque', (tester) async {
+      await pumpMovie(tester, Fixtures.movieA);
+
+      final inkWell = tester.widget<InkWell>(
+        find.ancestor(of: find.byIcon(Icons.favorite_border), matching: find.byType(InkWell)),
+      );
+      expect(inkWell.onTap, isNull);
+    });
+
+    testWidgets('showFavorite: false esconde o coração', (tester) async {
+      await pumpMovie(tester, Fixtures.movieA, showFavorite: false);
+
+      expect(find.byIcon(Icons.favorite), findsNothing);
+      expect(find.byIcon(Icons.favorite_border), findsNothing);
+    });
+
+    testWidgets('o coração acompanha o ValueListenable sem reconstruir a tela', (tester) async {
+      final favorite = ValueNotifier(false);
+      addTearDown(favorite.dispose);
+      await pumpMovie(tester, Fixtures.movieA, favorite: favorite);
+      expect(find.byIcon(Icons.favorite_border), findsOneWidget);
+
+      favorite.value = true;
+      await tester.pump();
+
+      expect(find.byIcon(Icons.favorite), findsOneWidget);
       expect(find.byIcon(Icons.favorite_border), findsNothing);
     });
 

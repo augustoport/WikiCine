@@ -29,6 +29,11 @@ class AuthApi implements AuthRepository {
   }
 
   @override
+  Future<bool> isLoggedIn() async {
+    return await storage.read(key: StorageKeys.sessionId) != null;
+  }
+
+  @override
   Future<void> logout() async {
     await storage.delete(key: StorageKeys.sessionId);
     await storage.delete(key: StorageKeys.accountId);

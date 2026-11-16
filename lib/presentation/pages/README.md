@@ -13,7 +13,7 @@ Obter cubits/controllers do locator, disparar carregamentos no `initState`, rend
 |---|---|---|---|
 | `login_page.dart` | `LoginPage` — logo, campos usuário/senha, link de cadastro TMDB, botão Login | `LoginController` | Valida campos vazios; login → `pushReplacement(HomePage)`; link → `launchUrl(Environment.production.signupUrl)`; `initState` → `checkExistingSession()` |
 | `home_page.dart` | `HomePage` — AppBar "WikiCine", busca, grid, barra inferior Movie/TV; `DrawerWidget` (avatar, nome, Profile, Settings, Exit) | `HomeCubit`, `HomeController`, `LoginController` | Carrega filmes; alterna Movie/TV; busca; Drawer: Profile → `ProfilePage`, Settings → `getIt<HomeCubit>().getTvShows()`, Exit → logout + `LoginPage` |
-| `movie_detail_page.dart` | `MovieDetailPage(movieId)` | `MovieCubit` | Renderiza `ContentDetail(type: "movie")` ou "Error" |
+| `movie_detail_page.dart` | `MovieDetailPage(movieId)` | `MovieCubit` | Renderiza `ContentDetail(type: "movie", showFavorite: canFavorite, favorite: movieCubit.isFavorite, onFavoriteTap)` ou "Error"; após favoritar, mostra `SnackBar` flutuante verde (sucesso) ou vermelho (erro) |
 | `tv_show_detail_page.dart` | `TvShowDetailPage(id)` | `SerieCubit` | Renderiza `ContentDetail(type: 'tv')` ou "Erro" |
 | `profile_page.dart` | `ProfilePage` + `ProfileHeader` + `Favorites` | `ProfileCubit`, `LoginController` | Lista favoritos; tap → `MovieDetailPage`; voltar |
 

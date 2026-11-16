@@ -23,6 +23,34 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
     super.initState();
   }
 
+  Future<void> _toggleFavorite() async {
+    final result = await movieCubit.toggleFavorite();
+    if (result == null || !mounted) return;
+
+    final (message, color) = switch (result) {
+      FavoriteResult.added => ('Adicionado com sucesso', Colors.green),
+      FavoriteResult.removed => ('Removido com sucesso', Colors.green),
+      FavoriteResult.addFailed => (
+        'Não foi possível adicionar o filme aos favoritos',
+        Colors.red,
+      ),
+      FavoriteResult.removeFailed => (
+        'Não foi possível remover o filme dos favoritos',
+        Colors.red,
+      ),
+    };
+
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: color,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,7 +70,9 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
               type: "movie",
               cast: state.cast,
               director: state.director,
-              isFavorite: state.isFavorite,
+              showFavorite: state.canFavorite,
+              favorite: movieCubit.isFavorite,
+              onFavoriteTap: _toggleFavorite,
             );
           } else {
             return Center(

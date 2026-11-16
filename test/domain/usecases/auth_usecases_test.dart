@@ -1,3 +1,4 @@
+import 'package:cinerating/domain/usecases/auth/is_logged_in_usecase.dart';
 import 'package:cinerating/domain/usecases/auth/login_usecase.dart';
 import 'package:cinerating/domain/usecases/auth/logout_usecase.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -44,6 +45,23 @@ void main() {
       repository.failing.add('logout');
 
       expect(LogoutUseCase(repository).call, throwsA(isA<FakeRepositoryException>()));
+    });
+  });
+
+  group('IsLoggedInUseCase', () {
+    late FakeAuthRepository repository;
+
+    setUp(() => repository = FakeAuthRepository());
+
+    test('true quando há sessão', () async {
+      repository.currentUser = Fixtures.user;
+
+      expect(await IsLoggedInUseCase(repository)(), isTrue);
+      expect(repository.calls, ['isLoggedIn']);
+    });
+
+    test('false para visitante (sem sessão)', () async {
+      expect(await IsLoggedInUseCase(repository)(), isFalse);
     });
   });
 }

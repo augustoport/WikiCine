@@ -136,7 +136,7 @@ As regras abaixo descrevem o **contrato desejado**. A coluna "Status" indica a a
 | `core/shared/` | Ambiente (`Environment`), chaves de storage (`StorageKeys`), cores (`AppColors`). | [`lib/core/shared/README.md`](../lib/core/shared/README.md) |
 | `domain/entities/` | `Movie`, `TvShow`, `User`, `Avatar`, `Genre`, `Credits`, `CastMember`. | [`lib/domain/entities/README.md`](../lib/domain/entities/README.md) |
 | `domain/repositories/` | Contratos `AuthRepository`, `MovieRepository`, `TvRepository`, `UserRepository`. | [`lib/domain/repositories/README.md`](../lib/domain/repositories/README.md) |
-| `domain/usecases/` | 12 casos de uso (auth, movies, tv_show, user). | [`lib/domain/usecases/README.md`](../lib/domain/usecases/README.md) |
+| `domain/usecases/` | 14 casos de uso (auth, movies, tv_show, user). | [`lib/domain/usecases/README.md`](../lib/domain/usecases/README.md) |
 | `data/datasources/` | Chamadas HTTP ao TMDB e acesso ao secure storage. | [`lib/data/datasources/README.md`](../lib/data/datasources/README.md) |
 | `data/models/` | DTOs com (de)serialização JSON. | [`lib/data/models/README.md`](../lib/data/models/README.md) |
 | `data/repositories/` | Implementações dos contratos de domínio (`AuthApi`, `MovieApi`, `TvRepositoryImpl`, `UserApi`). | [`lib/data/repositories/README.md`](../lib/data/repositories/README.md) |
@@ -196,8 +196,23 @@ MovieDetailPage → getIt<MovieCubit>() → getMovieDetails(id)
    GetMovieCrewUseCase    → MovieRepository.getMovieCredits → GET /movie/{id}/credits  → Credits
         data: cast = credits.cast; director = 1º membro de credits.crew com job == "Director"
         domínio: cast filtrado por department == "Acting"
-   GetUserFavoritesUseCase → UserRepository → GET /account/{account_id}/favorite/movies → isFavorite (false em erro)
-   emit MovieSuccess(movie, cast, director?, isFavorite) → ContentDetail(type: "movie")
+   IsLoggedInUseCase → AuthRepository.isLoggedIn (há sessão salva? sem rede)
+      visitante → canFavorite = false, isFavorite = false, favoritos não são consultados
+      logado    → GetUserFavoritesUseCase → GET /account/{account_id}/favorite/movies
+                  MovieCubit.isFavorite (ValueNotifier<bool>) = id está na lista (false em erro)
+   emit MovieSuccess(movie, cast, director?, canFavorite)
+      → ContentDetail(type: "movie", showFavorite: canFavorite, favorite: cubit.isFavorite, onFavoriteTap)
+
+Tocar no coração → MovieDetailPage._toggleFavorite → MovieCubit.toggleFavorite()
+   SetMovieFavoriteUseCase(movieId, favorite: !isFavorite.value) → UserRepository.setMovieFavorite
+      → UserImplementation  POST /account/{account_id}/favorite?session_id=…
+                            body {media_type: "movie", media_id, favorite: true|false}
+   sucesso → isFavorite.value = novo valor → só o coração reconstrói (ListenableBuilder); sem MovieLoading
+   retorna FavoriteResult → página mostra SnackBar flutuante:
+      added/removed           → verde  "Adicionado com sucesso" / "Removido com sucesso"
+      addFailed/removeFailed  → vermelho "Não foi possível adicionar o filme aos favoritos" /
+                                         "Não foi possível remover o filme dos favoritos"
+   toques enquanto uma atualização está em andamento são ignorados
 ```
 
 ### 6.6 Detalhe de série
@@ -225,7 +240,7 @@ Drawer "Profile" → ProfilePage → ProfileCubit.initProfile()
 | `FlutterSecureStorage` | `registerLazySingleton` (compartilhado por `AuthImplementation`, `UserImplementation`, `AuthApi`) |
 | `AuthData`, `MovieData`, `TvData`, `UserData` | `registerLazySingleton` |
 | `AuthRepository`, `MovieRepository`, `TvRepository`, `UserRepository` | `registerLazySingleton` |
-| 12 casos de uso | `registerFactory` |
+| 14 casos de uso | `registerFactory` |
 | `LoginController` | `registerLazySingleton` (casos de uso injetados no construtor) |
 | `HomeController` | `registerFactory` |
 | `HomeCubit`, `MovieCubit`, `SerieCubit`, `ProfileCubit` | `registerFactory` (casos de uso injetados no construtor) |
@@ -242,7 +257,7 @@ Drawer "Profile" → ProfilePage → ProfileCubit.initProfile()
 | B3 | **Exceção ao renderizar filme sem data** (confirmado por teste, hoje marcado como `skip` em `content_detail_test.dart`). `DateFormat.format` recebe `content.releaseDate` (pode ser `null`) quando `type == "movie"`; o `?? DateTime.now()` só se aplica ao ramo de série. | `content_detail.dart:175-178`; `movie_detail_model.dart:152` |
 | B4 | **Busca ignorada fora dos estados de dados.** `HomeController.setList` não faz nada se o estado for `HomeLoading`, `HomeError` ou `HomeInitial`. | `home_controller.dart:7-23` |
 | B5 | **Logout incompleto.** Agora remove `account_id`, mas ainda não invalida a sessão no TMDB (`DELETE /authentication/session`). | `auth_api.dart` |
-| B6 | **Favoritar é no-op.** O ícone de coração tem `onTap: () {}`. | `content_detail.dart:136` |
+| B6 | ✅ **Resolvido (2026-11-16).** O coração do detalhe de filme adiciona/remove dos favoritos (`SetMovieFavoriteUseCase`), com toast de sucesso/erro, e fica oculto para visitante. Séries estão fora do escopo por ora: o coração delas continua só indicativo. | `content_detail.dart`, `movie_cubit.dart` |
 | B7 | `Image.network("")` sem `errorBuilder` quando o usuário não tem avatar (Drawer e Perfil). **Hipótese:** gera erro de carregamento de imagem em tempo de execução. | `home_page.dart:213`; `profile_page.dart:87` |
 | B8 | ✅ **Resolvido (achado pelos testes).** A aba TV quebrava: `ContentList` lia `show.title` e `TvShow` não tem esse getter (`NoSuchMethodError`). Agora usa `title` para filmes e `name` para séries. | `content_list.dart` |
 | B9 | ✅ **Resolvido (achado pelos testes).** `ListTile`s do Drawer dentro de `Container` com cor de fundo disparavam assertion em modo debug; o fundo passou a ser um `Material`. | `home_page.dart` (`DrawerWidget`) |

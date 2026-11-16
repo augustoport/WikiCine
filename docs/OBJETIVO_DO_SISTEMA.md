@@ -54,7 +54,15 @@ WikiCine é um **aplicativo móvel (Flutter) de consulta a filmes e séries** qu
 
 ### F4 — Detalhe de título
 1. Toque em um card abre o detalhe.
-2. **Filme:** título, nota, votos, data de lançamento, duração, gêneros, sinopse, elenco (apenas atores), diretor e indicador de favorito.
+2. **Filme:** título, nota, votos, data de lançamento, duração, gêneros, sinopse, elenco (apenas atores), diretor e botão de favorito.
+   - **Regra de favorito (filmes):**
+     - **Visitante (sem sessão):** o coração **não aparece**.
+     - Coração **vazado** = o id do filme não está na lista de favoritos; tocar **adiciona**.
+     - Coração **preenchido** = o id está na lista; tocar **remove**.
+     - Só o coração é atualizado após a ação; a tela não recarrega nem mostra loading.
+     - **Sucesso:** toast verde "Adicionado com sucesso" / "Removido com sucesso".
+     - **Erro:** toast vermelho "Não foi possível adicionar o filme aos favoritos" / "Não foi possível remover o filme dos favoritos"; o coração mantém o estado anterior.
+   - Favoritos de **séries** estão fora do escopo no momento.
 3. **Série:** nome, nota, votos, data de estreia, gêneros, sinopse e elenco (com personagem). Duração exibida como "- min".
 
 ### F5 — Perfil e favoritos
@@ -78,8 +86,8 @@ WikiCine é um **aplicativo móvel (Flutter) de consulta a filmes e séries** qu
 | Detalhe de filme com elenco e diretor | ✅ Implementada |
 | Detalhe de série com elenco | ✅ Implementada |
 | Perfil com favoritos | ✅ Implementada (somente filmes) |
-| Indicador de favorito no detalhe do filme | ✅ Implementada (somente leitura) |
-| Marcar/desmarcar favorito | ❌ Ícone presente, ação vazia |
+| Indicador de favorito no detalhe do filme | ✅ Implementada |
+| Marcar/desmarcar favorito de filme | ✅ Implementada (coração no detalhe do filme) |
 | Watchlist | ❌ Estado prevê `watchlist`, sempre vazia |
 | Configurações ("Settings") | ❌ Item de menu sem tela; ação atual sem efeito visível |
 | Login automático com sessão salva | ❌ Sessão é carregada, mas não há redirecionamento |
@@ -122,7 +130,7 @@ Estas decisões são a **referência oficial** para as próximas especificaçõe
 | D6 | Fluxo de login | Manter **usuário e senha** dentro do app (`validate_with_login`). | Implementado. |
 | D7 | Acesso | **Login obrigatório**, mais um **modo guest** (acesso sem login) cujas regras serão definidas depois. | Login obrigatório implementado; guest não. |
 | D8 | Logout | Encerrar a sessão **também no TMDB** (`DELETE /authentication/session`). | Não implementado (só apaga local). |
-| D9 | Favoritar | O coração no detalhe **marca/desmarca** o favorito na conta TMDB. | Ícone presente, ação vazia. |
+| D9 | Favoritar | O coração no detalhe **marca/desmarca** o favorito na conta TMDB. | ✅ Implementado para filmes (2026-11-16), com toast de sucesso/erro. Séries fora do escopo no momento. |
 | D10 | Favoritos de séries | **Filmes e séries** podem ser favoritos (Perfil e detalhe). | Só filmes, somente leitura. |
 | D11 | Watchlist | **Implementar completa**: exibir no Perfil e adicionar/remover no detalhe. | Campo `watchlist` sempre vazio. |
 | D12 | Settings | Criar uma **tela de configurações**. Conteúdo inicial sugerido: idioma (ligado a D13). | Item de menu sem efeito. |
@@ -139,7 +147,7 @@ Estas decisões são a **referência oficial** para as próximas especificaçõe
 | ID | Tema | Decisão | Situação no código |
 |---|---|---|---|
 | D20 | Modo guest — escopo (P1) | Visitante tem **leitura completa**: Home, busca e detalhes. Não usa sessão guest do TMDB. | Não implementado. |
-| D21 | Modo guest — ações | Para o visitante, favoritar, watchlist, avaliar e o item **Profile** ficam **ocultos**. O menu mostra **"Entrar"**, que leva à tela de login. | Não implementado. |
+| D21 | Modo guest — ações | Para o visitante, favoritar, watchlist, avaliar e o item **Profile** ficam **ocultos**. O menu mostra **"Entrar"**, que leva à tela de login. | Parcial: o coração de favorito do detalhe de filme já fica oculto sem sessão (`IsLoggedInUseCase`). O modo guest em si ainda não existe. |
 | D22 | Entrada no app | Sem sessão, abre a **tela de login** com o botão secundário **"Continuar sem login"**. A escolha de guest **não é lembrada** ao reabrir. | Não implementado. |
 | D23 | Avaliação — escala (P3) | **5 estrelas com meia estrela** (0,5★ a 5★). O valor enviado ao TMDB é o **dobro** (0,5★ = 1, 5★ = 10). | Não implementado. |
 | D24 | Avaliação — remoção e exibição (P3) | O usuário pode **remover** a nota. A nota dele aparece **no detalhe** ("Sua nota", ao lado da média TMDB), numa **lista "Avaliados" no Perfil** e como **selo nos cards** da Home/busca. | Não implementado. |
