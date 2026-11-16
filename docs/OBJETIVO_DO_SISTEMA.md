@@ -54,7 +54,8 @@ WikiCine é um **aplicativo móvel (Flutter) de consulta a filmes e séries** qu
 
 ### F4 — Detalhe de título
 1. Toque em um card abre o detalhe.
-2. **Filme:** título, nota, votos, data de lançamento, duração, gêneros, sinopse, elenco (apenas atores), diretor e indicador de favorito.
+2. **Filme:** título, nota, votos, data de lançamento, duração, gêneros, sinopse, elenco (apenas atores), diretor e botão de favorito.
+   - **Regra de favorito:** coração **vazado** = o id do filme não está na lista de favoritos; tocar **adiciona**. Coração **preenchido** = o id está na lista; tocar **remove**. Após a ação, a tela é recarregada (detalhes, créditos e favoritos) para refletir o estado da conta.
 3. **Série:** nome, nota, votos, data de estreia, gêneros, sinopse e elenco (com personagem). Duração exibida como "- min".
 
 ### F5 — Perfil e favoritos
@@ -78,8 +79,8 @@ WikiCine é um **aplicativo móvel (Flutter) de consulta a filmes e séries** qu
 | Detalhe de filme com elenco e diretor | ✅ Implementada |
 | Detalhe de série com elenco | ✅ Implementada |
 | Perfil com favoritos | ✅ Implementada (somente filmes) |
-| Indicador de favorito no detalhe do filme | ✅ Implementada (somente leitura) |
-| Marcar/desmarcar favorito | ❌ Ícone presente, ação vazia |
+| Indicador de favorito no detalhe do filme | ✅ Implementada |
+| Marcar/desmarcar favorito de filme | ✅ Implementada (coração no detalhe do filme) |
 | Watchlist | ❌ Estado prevê `watchlist`, sempre vazia |
 | Configurações ("Settings") | ❌ Item de menu sem tela; ação atual sem efeito visível |
 | Login automático com sessão salva | ❌ Sessão é carregada, mas não há redirecionamento |
@@ -122,7 +123,7 @@ Estas decisões são a **referência oficial** para as próximas especificaçõe
 | D6 | Fluxo de login | Manter **usuário e senha** dentro do app (`validate_with_login`). | Implementado. |
 | D7 | Acesso | **Login obrigatório**, mais um **modo guest** (acesso sem login) cujas regras serão definidas depois. | Login obrigatório implementado; guest não. |
 | D8 | Logout | Encerrar a sessão **também no TMDB** (`DELETE /authentication/session`). | Não implementado (só apaga local). |
-| D9 | Favoritar | O coração no detalhe **marca/desmarca** o favorito na conta TMDB. | Ícone presente, ação vazia. |
+| D9 | Favoritar | O coração no detalhe **marca/desmarca** o favorito na conta TMDB. | ✅ Implementado para filmes (2026-11-16). Séries dependem de D10. |
 | D10 | Favoritos de séries | **Filmes e séries** podem ser favoritos (Perfil e detalhe). | Só filmes, somente leitura. |
 | D11 | Watchlist | **Implementar completa**: exibir no Perfil e adicionar/remover no detalhe. | Campo `watchlist` sempre vazio. |
 | D12 | Settings | Criar uma **tela de configurações**. Conteúdo inicial sugerido: idioma (ligado a D13). | Item de menu sem efeito. |

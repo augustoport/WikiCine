@@ -25,4 +25,18 @@ class UserImplementation implements UserData {
         .map((m) => MovieDetailModel.fromMap(m))
         .toList();
   }
+
+  /// `POST /account/{account_id}/favorite?session_id=...`
+  ///
+  /// O mesmo endpoint adiciona (`favorite: true`) ou remove (`favorite: false`).
+  @override
+  Future<void> setFavoriteMovie(int movieId, {required bool favorite}) async {
+    final accountId = await _storage.read(key: StorageKeys.accountId);
+    final sessionId = await _storage.read(key: StorageKeys.sessionId);
+    await _dio.post(
+      '/account/$accountId/favorite',
+      queryParameters: {'session_id': sessionId},
+      data: {'media_type': 'movie', 'media_id': movieId, 'favorite': favorite},
+    );
+  }
 }

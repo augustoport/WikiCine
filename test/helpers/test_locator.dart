@@ -11,6 +11,7 @@ import 'package:cinerating/domain/usecases/tv_show/get_tv_shows_usecase.dart';
 import 'package:cinerating/domain/usecases/tv_show/search_tv_shows_usecase.dart';
 import 'package:cinerating/domain/usecases/user/get_current_user_usecase.dart';
 import 'package:cinerating/domain/usecases/user/get_user_favorites_usecase.dart';
+import 'package:cinerating/domain/usecases/user/set_movie_favorite_usecase.dart';
 import 'package:cinerating/presentation/bloc/home/home_cubit.dart';
 import 'package:cinerating/presentation/bloc/movie_detail/movie_cubit.dart';
 import 'package:cinerating/presentation/bloc/profile/profile_cubit.dart';
@@ -41,6 +42,7 @@ Future<TestDeps> setupTestLocator() async {
   getIt.registerFactory(() => LogoutUseCase(deps.auth));
   getIt.registerFactory(() => GetCurrentUserUseCase(deps.auth));
   getIt.registerFactory(() => GetUserFavoritesUseCase(deps.user));
+  getIt.registerFactory(() => SetMovieFavoriteUseCase(deps.user));
   getIt.registerFactory(() => GetMoviesUseCase(deps.movies));
   getIt.registerFactory(() => SearchMoviesUseCase(deps.movies));
   getIt.registerFactory(() => GetMovieDetailsUseCase(deps.movies));
@@ -74,6 +76,7 @@ Future<TestDeps> setupTestLocator() async {
       getMovieDetailsUseCase: getIt<GetMovieDetailsUseCase>(),
       getMovieCrewUseCase: getIt<GetMovieCrewUseCase>(),
       getUserFavoritesUseCase: getIt<GetUserFavoritesUseCase>(),
+      setMovieFavoriteUseCase: getIt<SetMovieFavoriteUseCase>(),
     ),
   );
   getIt.registerFactory<SerieCubit>(

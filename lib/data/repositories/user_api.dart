@@ -9,4 +9,8 @@ class UserApi implements UserRepository {
 
   @override
   Future<List<Movie>> getUserMovieFavorites() => userData.getFavoriteMovies();
+
+  @override
+  Future<void> setMovieFavorite(int movieId, {required bool favorite}) =>
+      userData.setFavoriteMovie(movieId, favorite: favorite);
 }

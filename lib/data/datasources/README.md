@@ -44,6 +44,7 @@ Todas as requisições usam `baseUrl = Environment.production.baseUrl` e o heade
 | Método | Requisição | Retorno |
 |---|---|---|
 | `getFavoriteMovies` | lê `StorageKeys.accountId`; `GET /account/{id}/favorite/movies` | `List<Movie>` (`MovieDetailModel`) |
+| `setFavoriteMovie(movieId, {favorite})` | lê `accountId` e `sessionId`; `POST /account/{id}/favorite?session_id=…` com `{media_type: "movie", media_id, favorite}` | `void` |
 
 ## Dependências
 - **Internas:** `domain/entities/*`, `data/models/*`, `core/shared/env.dart`, `core/shared/storage_keys.dart`.
@@ -68,5 +69,5 @@ Injetados nos repositórios pelo locator.
 - **[Débito]** Nenhum tratamento de erro além do `try { } catch { rethrow; }` inócuo em `validateLogin`.
 - **[Débito]** Sem paginação (parâmetro `page`).
 - **[Risco S10]** `language: 'en-US;pt-BR'`. **Hipótese:** valor não reconhecido pelo TMDB.
-- **[Risco S11]** Favoritos sem `session_id`. O `TOKEN` é da conta do mantenedor (decisão D18); **Hipótese:** para outros usuários a chamada falha ou traz dados da conta errada. Toda chamada `/account/...` deve enviar `session_id`.
+- **[Risco S11]** A **leitura** de favoritos (`getFavoriteMovies`) ainda é feita sem `session_id`; a escrita (`setFavoriteMovie`) já envia, seguindo a diretriz 11. O `TOKEN` é da conta do mantenedor (decisão D18); **Hipótese:** para outros usuários a chamada falha ou traz dados da conta errada. Toda chamada `/account/...` deve enviar `session_id`.
 - As interfaces em `data/` não declaram `createRequestToken`, `validateLogin` e `createSession` (métodos públicos só da implementação).

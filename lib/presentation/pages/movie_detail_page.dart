@@ -43,6 +43,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
               cast: state.cast,
               director: state.director,
               isFavorite: state.isFavorite,
+              onFavoriteTap: movieCubit.toggleFavorite,
             );
           } else {
             return Center(

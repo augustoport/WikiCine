@@ -136,9 +136,22 @@ class FakeTvRepository extends _FakeRepository implements TvRepository {
 class FakeUserRepository extends _FakeRepository implements UserRepository {
   List<Movie> favorites = [Fixtures.movieA];
 
+  /// Filmes que podem entrar nos favoritos via `setMovieFavorite`.
+  List<Movie> catalog = Fixtures.movies;
+
   @override
   Future<List<Movie>> getUserMovieFavorites() async {
     await record('getUserMovieFavorites');
     return favorites;
+  }
+
+  /// Registra `setMovieFavorite:<id>:<true|false>` e atualiza [favorites].
+  @override
+  Future<void> setMovieFavorite(int movieId, {required bool favorite}) async {
+    await record('setMovieFavorite', '$movieId:$favorite');
+    final others = favorites.where((m) => m.id != movieId).toList();
+    favorites = favorite
+        ? [...others, catalog.firstWhere((m) => m.id == movieId)]
+        : others;
   }
 }

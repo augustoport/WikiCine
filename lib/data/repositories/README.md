@@ -14,7 +14,7 @@ Ponte entre domínio e fontes de dados; ponto natural para cache, mapeamento de 
 | `auth_api.dart` | `AuthApi` | `AuthRepository` | `AuthData`, `FlutterSecureStorage` | `login` delega; `getCurrentUser` lê `StorageKeys.sessionId` e chama `getAccountDetails` (retorna `null` em erro); `logout` apaga `sessionId` e `accountId`. |
 | `movie_api.dart` | `MovieApi` | `MovieRepository` | `MovieData` | Delegação 1:1. |
 | `tv_api.dart` | `TvRepositoryImpl` | `TvRepository` | `TvData` (nomeado `remoteDataSource`) | Delegação 1:1. |
-| `user_api.dart` | `UserApi` | `UserRepository` | `UserData` | Delegação 1:1. |
+| `user_api.dart` | `UserApi` | `UserRepository` | `UserData` | Delegação 1:1 (`getUserMovieFavorites`, `setMovieFavorite`). |
 
 ## Dependências
 - **Internas:** `domain/repositories/*`, `domain/entities/*`, `data/datasources/data/*`, `core/shared/storage_keys.dart`.

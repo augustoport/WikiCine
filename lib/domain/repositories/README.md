@@ -14,7 +14,7 @@ Inversão de dependência: `domain` declara, `data` implementa. Todos os retorno
 | `AuthRepository` | `login({username, password}) → User`; `getCurrentUser() → User?`; `logout()` | `data/repositories/auth_api.dart` (`AuthApi`) |
 | `MovieRepository` | `getMovies()`, `searchMovies(query)` → `List<Movie>`; `getMovieDetails(id) → Movie`; `getMovieCredits(id) → Credits` | `data/repositories/movie_api.dart` (`MovieApi`) |
 | `TvRepository` | `getTvShows()`, `searchTvShows(query)` → `List<TvShow>`; `getTvShowDetails(id) → TvShow`; `getTvShowCredits(id) → Credits` | `data/repositories/tv_api.dart` (`TvRepositoryImpl`) |
-| `UserRepository` | `getUserMovieFavorites() → List<Movie>` | `data/repositories/user_api.dart` (`UserApi`) |
+| `UserRepository` | `getUserMovieFavorites() → List<Movie>`; `setMovieFavorite(movieId, {favorite}) → void` (adiciona com `true`, remove com `false`) | `data/repositories/user_api.dart` (`UserApi`) |
 
 ## Dependências
 - **Internas:** `domain/entities/*`.

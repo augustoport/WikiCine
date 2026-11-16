@@ -29,6 +29,7 @@ import '../domain/usecases/tv_show/get_tv_shows_usecase.dart';
 import '../domain/usecases/tv_show/search_tv_shows_usecase.dart';
 import '../domain/usecases/user/get_current_user_usecase.dart';
 import '../domain/usecases/user/get_user_favorites_usecase.dart';
+import '../domain/usecases/user/set_movie_favorite_usecase.dart';
 import '../presentation/bloc/home/home_cubit.dart';
 import '../presentation/bloc/movie_detail/movie_cubit.dart';
 import '../presentation/bloc/profile/profile_cubit.dart';
@@ -73,6 +74,7 @@ void setupLocator() {
   getIt.registerFactory(() => LogoutUseCase(getIt<AuthRepository>()));
   getIt.registerFactory(() => GetCurrentUserUseCase(getIt<AuthRepository>()));
   getIt.registerFactory(() => GetUserFavoritesUseCase(getIt<UserRepository>()));
+  getIt.registerFactory(() => SetMovieFavoriteUseCase(getIt<UserRepository>()));
   getIt.registerFactory(() => GetMoviesUseCase(getIt<MovieRepository>()));
   getIt.registerFactory(() => SearchMoviesUseCase(getIt<MovieRepository>()));
   getIt.registerFactory(() => GetMovieDetailsUseCase(getIt<MovieRepository>()));
@@ -106,6 +108,7 @@ void setupLocator() {
       getMovieDetailsUseCase: getIt<GetMovieDetailsUseCase>(),
       getMovieCrewUseCase: getIt<GetMovieCrewUseCase>(),
       getUserFavoritesUseCase: getIt<GetUserFavoritesUseCase>(),
+      setMovieFavoriteUseCase: getIt<SetMovieFavoriteUseCase>(),
     ),
   );
   getIt.registerFactory<SerieCubit>(

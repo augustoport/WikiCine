@@ -71,6 +71,59 @@ void main() {
       expect(find.byIcon(Icons.favorite_border), findsOneWidget);
     });
 
+    testWidgets('tocar no coração vazio adiciona aos favoritos e recarrega', (tester) async {
+      deps.user.favorites = [Fixtures.movieA];
+      await pumpMovie(tester, '2');
+      expect(find.byIcon(Icons.favorite_border), findsOneWidget);
+
+      await tester.tap(find.byIcon(Icons.favorite_border));
+      await tester.pumpAndSettle();
+
+      expect(deps.user.calls, [
+        'getUserMovieFavorites',
+        'setMovieFavorite:2:true',
+        'getUserMovieFavorites',
+      ]);
+      // O "initbloc" (getMovieDetails) é chamado de novo após a ação.
+      expect(deps.movies.calls.where((c) => c == 'getMovieDetails:2'), hasLength(2));
+      expect(deps.user.favorites.map((m) => m.id), contains(2));
+      expect(find.byIcon(Icons.favorite), findsOneWidget);
+      expect(find.byIcon(Icons.favorite_border), findsNothing);
+    });
+
+    testWidgets('tocar no coração preenchido remove dos favoritos e recarrega', (tester) async {
+      deps.user.favorites = [Fixtures.movieA];
+      await pumpMovie(tester, '1');
+      expect(find.byIcon(Icons.favorite), findsOneWidget);
+
+      await tester.tap(find.byIcon(Icons.favorite));
+      await tester.pumpAndSettle();
+
+      expect(deps.user.calls, [
+        'getUserMovieFavorites',
+        'setMovieFavorite:1:false',
+        'getUserMovieFavorites',
+      ]);
+      expect(deps.movies.calls.where((c) => c == 'getMovieDetails:1'), hasLength(2));
+      expect(deps.user.favorites.map((m) => m.id), isNot(contains(1)));
+      expect(find.byIcon(Icons.favorite_border), findsOneWidget);
+      expect(find.byIcon(Icons.favorite), findsNothing);
+    });
+
+    testWidgets('falha ao favoritar recarrega e mantém o estado da conta', (tester) async {
+      deps.user.favorites = [Fixtures.movieA];
+      deps.user.failing.add('setMovieFavorite');
+      await pumpMovie(tester, '2');
+
+      await tester.tap(find.byIcon(Icons.favorite_border));
+      await tester.pumpAndSettle();
+
+      expect(deps.user.calls, contains('setMovieFavorite:2:true'));
+      expect(deps.movies.calls.where((c) => c == 'getMovieDetails:2'), hasLength(2));
+      expect(find.text('Cidade de Deus'), findsOneWidget);
+      expect(find.byIcon(Icons.favorite_border), findsOneWidget);
+    });
+
     testWidgets('mostra "Error" quando os detalhes falham', (tester) async {
       deps.movies.failing.add('getMovieDetails');
 

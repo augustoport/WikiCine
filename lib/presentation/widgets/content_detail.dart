@@ -11,6 +11,9 @@ class ContentDetail extends StatelessWidget {
   final CastMember? director;
   final String type;
   final bool? isFavorite;
+
+  /// Toque no coração. Quando `null`, o ícone só indica o estado.
+  final VoidCallback? onFavoriteTap;
   const ContentDetail({
     super.key,
     required this.content,
@@ -18,6 +21,7 @@ class ContentDetail extends StatelessWidget {
     this.cast = const [],
     this.director,
     this.isFavorite = false,
+    this.onFavoriteTap,
   });
 
   @override
@@ -132,7 +136,7 @@ class ContentDetail extends StatelessWidget {
                     InkWell(
                       enableFeedback: false,
                       splashColor: Colors.transparent,
-                      onTap: () {},
+                      onTap: onFavoriteTap,
                       child: Icon(
                         isFavorite == true
                             ? Icons.favorite

@@ -22,6 +22,7 @@ void main() {
       List<CastMember> cast = const [Fixtures.actor],
       CastMember? director = Fixtures.director,
       bool isFavorite = false,
+      VoidCallback? onFavoriteTap,
     }) async {
       await pumpInScaffold(
         tester,
@@ -31,6 +32,7 @@ void main() {
           cast: cast,
           director: director,
           isFavorite: isFavorite,
+          onFavoriteTap: onFavoriteTap,
         ),
       );
       await tester.pumpAndSettle();
@@ -73,6 +75,24 @@ void main() {
       final icon = tester.widget<Icon>(find.byIcon(Icons.favorite));
       expect(icon.color, Colors.red);
       expect(find.byIcon(Icons.favorite_border), findsNothing);
+    });
+
+    testWidgets('tocar no coração chama onFavoriteTap', (tester) async {
+      var taps = 0;
+      await pumpMovie(tester, Fixtures.movieA, onFavoriteTap: () => taps++);
+
+      await tester.tap(find.byIcon(Icons.favorite_border));
+
+      expect(taps, 1);
+    });
+
+    testWidgets('sem onFavoriteTap o coração não reage ao toque', (tester) async {
+      await pumpMovie(tester, Fixtures.movieA);
+
+      final inkWell = tester.widget<InkWell>(
+        find.ancestor(of: find.byIcon(Icons.favorite_border), matching: find.byType(InkWell)),
+      );
+      expect(inkWell.onTap, isNull);
     });
 
     testWidgets('usa "N/A" para nota, votos e sinopse ausentes', (tester) async {
