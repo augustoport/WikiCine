@@ -44,5 +44,6 @@ flutter test integration_test -d <device-id>       # integração (emulador/apar
 ## Observações técnicas e débitos
 - **[Bug B3]** `content_detail_test.dart` tem um teste com `skip: true` para filme sem data de lançamento; basta remover o `skip` quando o bug for corrigido.
 - Bugs **B8, B9 e B10** (seção 7.1 da arquitetura) foram encontrados por esta suíte e corrigidos.
-- **Ainda sem cobertura:** `data/models` (`fromMap`), datasources/repositórios (Dio), cubits e controllers isolados (exercitados apenas indiretamente pelos testes de widget). Não há CI.
+- **Ainda sem cobertura:** `data/models` (`fromMap`), datasources/repositórios (Dio), cubits e controllers isolados (exercitados apenas indiretamente pelos testes de widget).
 - O teste de integração não acessa a API do TMDB: usa `MyApp` real com repositórios falsos. Um teste contra a API real exigiria `--dart-define=TOKEN/API_KEY` e credenciais de uma conta de teste, e seria instável (rede, dados mutáveis).
+- **CI:** o workflow `.github/workflows/ci.yml` roda `dart format`, `flutter analyze` e `flutter test --coverage` em todo PR e push na `main`. O teste de integração **não** roda no CI: ele precisa de emulador/aparelho (no `flutter-tester`, a tela padrão de 800x600 estoura o layout da `LoginPage`).
