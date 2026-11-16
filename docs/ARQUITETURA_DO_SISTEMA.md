@@ -343,7 +343,7 @@ Drawer "Profile" → ProfilePage → ProfileCubit.initProfile()
 
 ## 10. Diretrizes para futuras implementações
 
-1. **Especifique antes de codificar (SDD).** Toda feature nova deve ter uma especificação com: caso de uso, entidade(s), contrato de repositório, endpoints TMDB, estados de UI e critérios de aceite. Atualize este documento e o README do módulo afetado no mesmo PR.
+1. **Especifique antes de codificar (SDD).** Toda feature nova deve ter uma especificação com: caso de uso, entidade(s), contrato de repositório, endpoints TMDB, estados de UI e critérios de aceite. Atualize este documento e o README do módulo afetado no mesmo PR. A spec é criada com a skill `spec-feature` (`/spec-feature <descrição>`, em `.claude/skills/spec-feature/`) e fica em `specs/NNN-nome/spec.md`, com índice em [`specs/README.md`](../specs/README.md).
 2. **Ordem de criação de uma feature:**
    1. `domain/entities/` — entidade imutável (`final`), sem dependência de Flutter/Dio.
    2. `domain/repositories/` — contrato **tipado** (proibido `dynamic`).
