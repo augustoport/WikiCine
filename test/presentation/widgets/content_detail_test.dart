@@ -43,7 +43,9 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    testWidgets('exibe título, nota, votos, data, duração, gêneros e sinopse', (tester) async {
+    testWidgets('exibe título, nota, votos, data, duração, gêneros e sinopse', (
+      tester,
+    ) async {
       await pumpMovie(tester, Fixtures.movieA);
 
       expect(find.text('Interestelar'), findsOneWidget);
@@ -68,7 +70,9 @@ void main() {
       expect(find.text('Christopher Nolan'), findsOneWidget);
     });
 
-    testWidgets('omite o bloco "Directed by" quando não há diretor', (tester) async {
+    testWidgets('omite o bloco "Directed by" quando não há diretor', (
+      tester,
+    ) async {
       await pumpMovie(tester, Fixtures.movieA, director: null);
 
       expect(find.text('Directed by:'), findsNothing);
@@ -91,11 +95,16 @@ void main() {
       expect(taps, 1);
     });
 
-    testWidgets('sem onFavoriteTap o coração não reage ao toque', (tester) async {
+    testWidgets('sem onFavoriteTap o coração não reage ao toque', (
+      tester,
+    ) async {
       await pumpMovie(tester, Fixtures.movieA);
 
       final inkWell = tester.widget<InkWell>(
-        find.ancestor(of: find.byIcon(Icons.favorite_border), matching: find.byType(InkWell)),
+        find.ancestor(
+          of: find.byIcon(Icons.favorite_border),
+          matching: find.byType(InkWell),
+        ),
       );
       expect(inkWell.onTap, isNull);
     });
@@ -107,20 +116,25 @@ void main() {
       expect(find.byIcon(Icons.favorite_border), findsNothing);
     });
 
-    testWidgets('o coração acompanha o ValueListenable sem reconstruir a tela', (tester) async {
-      final favorite = ValueNotifier(false);
-      addTearDown(favorite.dispose);
-      await pumpMovie(tester, Fixtures.movieA, favorite: favorite);
-      expect(find.byIcon(Icons.favorite_border), findsOneWidget);
+    testWidgets(
+      'o coração acompanha o ValueListenable sem reconstruir a tela',
+      (tester) async {
+        final favorite = ValueNotifier(false);
+        addTearDown(favorite.dispose);
+        await pumpMovie(tester, Fixtures.movieA, favorite: favorite);
+        expect(find.byIcon(Icons.favorite_border), findsOneWidget);
 
-      favorite.value = true;
-      await tester.pump();
+        favorite.value = true;
+        await tester.pump();
 
-      expect(find.byIcon(Icons.favorite), findsOneWidget);
-      expect(find.byIcon(Icons.favorite_border), findsNothing);
-    });
+        expect(find.byIcon(Icons.favorite), findsOneWidget);
+        expect(find.byIcon(Icons.favorite_border), findsNothing);
+      },
+    );
 
-    testWidgets('usa "N/A" para nota, votos e sinopse ausentes', (tester) async {
+    testWidgets('usa "N/A" para nota, votos e sinopse ausentes', (
+      tester,
+    ) async {
       await pumpMovie(
         tester,
         Movie(id: 9, title: 'Sem dados', releaseDate: DateTime(2020)),
@@ -142,7 +156,8 @@ void main() {
         expect(tester.takeException(), isNull);
         expect(find.text('Sem data'), findsOneWidget);
       },
-      skip: true, // Bug B3: `DateFormat.format(content.releaseDate)` com null lança exceção (content_detail.dart:973).
+      skip:
+          true, // Bug B3: `DateFormat.format(content.releaseDate)` com null lança exceção (content_detail.dart:973).
     );
   });
 
@@ -179,8 +194,13 @@ void main() {
   });
 
   group('CastCard', () {
-    testWidgets('sem foto mostra ícone de pessoa e omite personagem nulo', (tester) async {
-      await pumpInScaffold(tester, const CastCard(CastMember(name: 'Figurante')));
+    testWidgets('sem foto mostra ícone de pessoa e omite personagem nulo', (
+      tester,
+    ) async {
+      await pumpInScaffold(
+        tester,
+        const CastCard(CastMember(name: 'Figurante')),
+      );
 
       expect(find.byIcon(Icons.person), findsOneWidget);
       expect(find.text('Figurante'), findsOneWidget);
@@ -196,7 +216,9 @@ void main() {
     testWidgets('com foto carrega imagem de rede', (tester) async {
       await pumpInScaffold(
         tester,
-        const CastCard(CastMember(name: 'Ator', profilePath: 'https://example.com/a.jpg')),
+        const CastCard(
+          CastMember(name: 'Ator', profilePath: 'https://example.com/a.jpg'),
+        ),
       );
       await tester.pumpAndSettle();
 

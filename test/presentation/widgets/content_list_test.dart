@@ -27,7 +27,11 @@ void main() {
   }) async {
     await pumpInScaffold(
       tester,
-      ContentList(content: content, type: type, onRefresh: onRefresh ?? () async {}),
+      ContentList(
+        content: content,
+        type: type,
+        onRefresh: onRefresh ?? () async {},
+      ),
     );
     await tester.pumpAndSettle();
   }
@@ -42,10 +46,15 @@ void main() {
     expect(find.text('8.4'), findsOneWidget);
   });
 
-  testWidgets('usa "name" para séries e nota 0.0 quando ausente', (tester) async {
+  testWidgets('usa "name" para séries e nota 0.0 quando ausente', (
+    tester,
+  ) async {
     await pumpList(
       tester,
-      content: [...Fixtures.tvShows, Movie(id: 3, name: 'Sem nota')],
+      content: [
+        ...Fixtures.tvShows,
+        Movie(id: 3, name: 'Sem nota'),
+      ],
       type: 'tv',
     );
 
@@ -82,7 +91,9 @@ void main() {
     expect(refreshed, 1);
   });
 
-  testWidgets('tipo "movie" navega para MovieDetailPage com o id', (tester) async {
+  testWidgets('tipo "movie" navega para MovieDetailPage com o id', (
+    tester,
+  ) async {
     await pumpList(tester, content: Fixtures.movies, type: 'movie');
 
     await tester.tap(find.text('Cidade de Deus'));
@@ -93,7 +104,9 @@ void main() {
     expect(deps.movies.calls, contains('getMovieDetails:2'));
   });
 
-  testWidgets('tipo "tv" navega para TvShowDetailPage com o id', (tester) async {
+  testWidgets('tipo "tv" navega para TvShowDetailPage com o id', (
+    tester,
+  ) async {
     await pumpList(tester, content: Fixtures.tvShows, type: 'tv');
 
     await tester.tap(find.text('Dark'));

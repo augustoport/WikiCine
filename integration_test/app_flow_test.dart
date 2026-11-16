@@ -30,7 +30,9 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('login → filmes → detalhe → séries → perfil → logout', (tester) async {
+  testWidgets('login → filmes → detalhe → séries → perfil → logout', (
+    tester,
+  ) async {
     await tester.pumpWidget(const MyApp());
     await tester.pumpAndSettle();
 
@@ -76,7 +78,10 @@ void main() {
 
     // Drawer → Perfil com favoritos → detalhe do favorito.
     await tapAndSettle(tester, find.byTooltip('Open navigation menu'));
-    expect(find.textContaining('Ana Cinéfila', findRichText: true), findsOneWidget);
+    expect(
+      find.textContaining('Ana Cinéfila', findRichText: true),
+      findsOneWidget,
+    );
     await tapAndSettle(tester, find.text('Profile'));
     expect(find.byType(ProfilePage), findsOneWidget);
     expect(find.text('Ana Cinéfila'), findsOneWidget);

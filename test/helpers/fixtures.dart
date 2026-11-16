@@ -25,7 +25,10 @@ class Fixtures {
     voteCount: 32000,
     runtime: 169,
     releaseDate: DateTime(2014, 11, 6),
-    genres: const [Genre(id: 878, name: 'Ficção científica'), Genre(id: 18, name: 'Drama')],
+    genres: const [
+      Genre(id: 878, name: 'Ficção científica'),
+      Genre(id: 18, name: 'Drama'),
+    ],
   );
 
   static final movieB = Movie(

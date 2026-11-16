@@ -23,7 +23,10 @@ void main() {
     test('propaga falha do repositório', () {
       repository.failing.add('getTvShows');
 
-      expect(GetTvShowsUseCase(repository).call, throwsA(isA<FakeRepositoryException>()));
+      expect(
+        GetTvShowsUseCase(repository).call,
+        throwsA(isA<FakeRepositoryException>()),
+      );
     });
   });
 

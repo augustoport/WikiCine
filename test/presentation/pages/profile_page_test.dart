@@ -51,7 +51,10 @@ void main() {
 
     expect(find.text('Favorites'), findsOneWidget);
     expect(
-      find.descendant(of: find.byType(Favorites), matching: find.byType(InkWell)),
+      find.descendant(
+        of: find.byType(Favorites),
+        matching: find.byType(InkWell),
+      ),
       findsNothing,
     );
   });

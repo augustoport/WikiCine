@@ -89,7 +89,8 @@ Future<TestDeps> setupTestLocator() async {
     ),
   );
   getIt.registerFactory<ProfileCubit>(
-    () => ProfileCubit(getUserFavoritesUseCase: getIt<GetUserFavoritesUseCase>()),
+    () =>
+        ProfileCubit(getUserFavoritesUseCase: getIt<GetUserFavoritesUseCase>()),
   );
 
   return deps;

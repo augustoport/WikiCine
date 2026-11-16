@@ -51,7 +51,9 @@ void main() {
       expect(sessionCard(tester, 'TV').active, isFalse);
     });
 
-    testWidgets('mostra indicador de carregamento enquanto busca', (tester) async {
+    testWidgets('mostra indicador de carregamento enquanto busca', (
+      tester,
+    ) async {
       deps.movies.delay = const Duration(milliseconds: 500);
       await pumpApp(tester, const HomePage());
       await tester.pump(); // executa o microtask que dispara getMovies()
@@ -62,7 +64,9 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsNothing);
     });
 
-    testWidgets('alterna para séries ao tocar em "TV" e volta para filmes', (tester) async {
+    testWidgets('alterna para séries ao tocar em "TV" e volta para filmes', (
+      tester,
+    ) async {
       await pumpHome(tester);
 
       await tester.tap(find.text('TV'));
@@ -80,7 +84,9 @@ void main() {
       expect(sessionCard(tester, 'Movie').active, isTrue);
     });
 
-    testWidgets('pesquisa filmes pelo campo de busca e limpa o campo', (tester) async {
+    testWidgets('pesquisa filmes pelo campo de busca e limpa o campo', (
+      tester,
+    ) async {
       await pumpHome(tester);
 
       await search(tester, 'cidade');
@@ -88,7 +94,10 @@ void main() {
       expect(deps.movies.calls, contains('searchMovies:cidade'));
       expect(find.text(Fixtures.movieB.title!), findsOneWidget);
       expect(find.text(Fixtures.movieA.title!), findsNothing);
-      expect(tester.widget<TextField>(find.byType(TextField)).controller!.text, isEmpty);
+      expect(
+        tester.widget<TextField>(find.byType(TextField)).controller!.text,
+        isEmpty,
+      );
     });
 
     testWidgets('pesquisa séries quando a aba TV está ativa', (tester) async {
@@ -112,7 +121,9 @@ void main() {
       expect(deps.movies.calls, isNot(contains(startsWith('searchMovies'))));
     });
 
-    testWidgets('exibe mensagem de erro quando a busca de filmes falha', (tester) async {
+    testWidgets('exibe mensagem de erro quando a busca de filmes falha', (
+      tester,
+    ) async {
       deps.movies.failing.add('getMovies');
 
       await pumpHome(tester);
@@ -120,14 +131,19 @@ void main() {
       expect(find.text('Não foi possível carregar os filmes'), findsOneWidget);
     });
 
-    testWidgets('exibe mensagem de erro quando a busca de séries falha', (tester) async {
+    testWidgets('exibe mensagem de erro quando a busca de séries falha', (
+      tester,
+    ) async {
       deps.tv.failing.add('getTvShows');
       await pumpHome(tester);
 
       await tester.tap(find.text('TV'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Não foi possível carregar os programas de TV'), findsOneWidget);
+      expect(
+        find.text('Não foi possível carregar os programas de TV'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('tocar em um filme abre o detalhe do filme', (tester) async {
@@ -165,7 +181,10 @@ void main() {
 
       await openDrawer(tester);
 
-      expect(find.textContaining('Ana Cinéfila', findRichText: true), findsOneWidget);
+      expect(
+        find.textContaining('Ana Cinéfila', findRichText: true),
+        findsOneWidget,
+      );
       expect(find.text('Profile'), findsOneWidget);
       expect(find.text('Settings'), findsOneWidget);
       expect(find.text('Exit'), findsOneWidget);
@@ -173,14 +192,19 @@ void main() {
       expect(deps.auth.calls, isNot(contains('getCurrentUser')));
     });
 
-    testWidgets('sem usuário em memória, recupera a sessão existente', (tester) async {
+    testWidgets('sem usuário em memória, recupera a sessão existente', (
+      tester,
+    ) async {
       deps.auth.currentUser = Fixtures.user;
       await pumpHome(tester);
 
       await openDrawer(tester);
 
       expect(deps.auth.calls, contains('getCurrentUser'));
-      expect(find.textContaining('Ana Cinéfila', findRichText: true), findsOneWidget);
+      expect(
+        find.textContaining('Ana Cinéfila', findRichText: true),
+        findsOneWidget,
+      );
     });
 
     testWidgets('sem sessão, exibe "Usuário" como nome padrão', (tester) async {
@@ -188,7 +212,10 @@ void main() {
 
       await openDrawer(tester);
 
-      expect(find.textContaining('Usuário', findRichText: true), findsOneWidget);
+      expect(
+        find.textContaining('Usuário', findRichText: true),
+        findsOneWidget,
+      );
     });
 
     testWidgets('"Profile" abre a página de perfil', (tester) async {

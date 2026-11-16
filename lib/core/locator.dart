@@ -66,9 +66,7 @@ void setupLocator() {
   getIt.registerLazySingleton<TvRepository>(
     () => TvRepositoryImpl(remoteDataSource: getIt<TvData>()),
   );
-  getIt.registerLazySingleton<UserRepository>(
-    () => UserApi(getIt<UserData>()),
-  );
+  getIt.registerLazySingleton<UserRepository>(() => UserApi(getIt<UserData>()));
 
   // Use Cases
   getIt.registerFactory(() => LoginUseCase(getIt<AuthRepository>()));
@@ -121,6 +119,7 @@ void setupLocator() {
     ),
   );
   getIt.registerFactory<ProfileCubit>(
-    () => ProfileCubit(getUserFavoritesUseCase: getIt<GetUserFavoritesUseCase>()),
+    () =>
+        ProfileCubit(getUserFavoritesUseCase: getIt<GetUserFavoritesUseCase>()),
   );
 }

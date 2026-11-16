@@ -24,16 +24,19 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('exibe campos de usuário/senha, link de cadastro e botão de login', (tester) async {
-    await pumpApp(tester, const LoginPage());
-    await tester.pumpAndSettle();
+  testWidgets(
+    'exibe campos de usuário/senha, link de cadastro e botão de login',
+    (tester) async {
+      await pumpApp(tester, const LoginPage());
+      await tester.pumpAndSettle();
 
-    expect(find.text('Usuário'), findsOneWidget);
-    expect(find.text('Senha'), findsOneWidget);
-    expect(find.text('Não possui conta no TMDB? '), findsOneWidget);
-    expect(find.text('Clique aqui'), findsOneWidget);
-    expect(find.text('Login'), findsOneWidget);
-  });
+      expect(find.text('Usuário'), findsOneWidget);
+      expect(find.text('Senha'), findsOneWidget);
+      expect(find.text('Não possui conta no TMDB? '), findsOneWidget);
+      expect(find.text('Clique aqui'), findsOneWidget);
+      expect(find.text('Login'), findsOneWidget);
+    },
+  );
 
   testWidgets('verifica sessão existente ao abrir', (tester) async {
     await pumpApp(tester, const LoginPage());
@@ -69,7 +72,9 @@ void main() {
     expect(find.byType(LoginPage), findsOneWidget);
   });
 
-  testWidgets('mostra erro com credenciais inválidas e permanece no login', (tester) async {
+  testWidgets('mostra erro com credenciais inválidas e permanece no login', (
+    tester,
+  ) async {
     await pumpApp(tester, const LoginPage());
     await tester.pumpAndSettle();
 

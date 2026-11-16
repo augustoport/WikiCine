@@ -50,8 +50,9 @@ class MovieImplementation implements MovieData {
         .map((c) => CrewModel.fromMap(c).toEntity())
         .toList();
 
-    final crew = (response.data['crew'] as List? ?? [])
-        .map((c) => CrewModel.fromMap(c).toEntity());
+    final crew = (response.data['crew'] as List? ?? []).map(
+      (c) => CrewModel.fromMap(c).toEntity(),
+    );
 
     final directors = crew.where((c) => c.job == 'Director');
 

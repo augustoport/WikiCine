@@ -243,7 +243,6 @@ class BelongsToCollection {
   };
 }
 
-
 class ProductionCompany {
   int? id;
   String? logoPath;

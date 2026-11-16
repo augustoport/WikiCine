@@ -98,17 +98,23 @@ void main() {
       expect(user.calls, isEmpty);
     });
 
-    test('ignora toque repetido enquanto a atualização está em andamento', () async {
-      await cubit.getMovieDetails('2');
-      user.delay = const Duration(milliseconds: 20);
+    test(
+      'ignora toque repetido enquanto a atualização está em andamento',
+      () async {
+        await cubit.getMovieDetails('2');
+        user.delay = const Duration(milliseconds: 20);
 
-      final first = cubit.toggleFavorite();
-      final second = await cubit.toggleFavorite();
+        final first = cubit.toggleFavorite();
+        final second = await cubit.toggleFavorite();
 
-      expect(second, isNull);
-      expect(await first, FavoriteResult.added);
-      expect(user.calls.where((c) => c.startsWith('setMovieFavorite')), hasLength(1));
-    });
+        expect(second, isNull);
+        expect(await first, FavoriteResult.added);
+        expect(
+          user.calls.where((c) => c.startsWith('setMovieFavorite')),
+          hasLength(1),
+        );
+      },
+    );
 
     test('antes de carregar o filme não faz nada', () async {
       expect(await cubit.toggleFavorite(), isNull);
