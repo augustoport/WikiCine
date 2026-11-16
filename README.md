@@ -25,7 +25,7 @@ Aplicativo mobile companion para filmes e séries, desenvolvido em Flutter, que 
 
 | Workflow | Quando roda | O que faz |
 |---|---|---|
-| [`ci.yml`](.github/workflows/ci.yml) | Todo pull request e push na `main` | Verifica formatação (`dart format`), `flutter analyze`, `flutter test --coverage` e gera um APK de release (artefato do workflow, guardado por 7 dias). |
+| [`ci.yml`](.github/workflows/ci.yml) | Todo pull request e push na `master` | Verifica formatação (`dart format`), `flutter analyze`, `flutter test --coverage` e gera um APK de release (artefato do workflow, guardado por 7 dias). |
 | [`release.yml`](.github/workflows/release.yml) | Push de tag `v*.*.*` | Roda análise e testes, gera APK + AAB assinados e publica uma **GitHub Release** com os arquivos. Tags com hífen (`v1.2.0-beta.1`) viram pré-release. |
 
 **Publicar uma versão:**
