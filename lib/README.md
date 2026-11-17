@@ -11,7 +11,7 @@ Conter todo o código do app Flutter, organizado em Clean Architecture.
 
 ## Funcionalidades existentes
 - `main()` → `setupLocator()` → `runApp(MyApp())`.
-- `MyApp` → `MaterialApp(title: 'Flutter Demo', theme: ColorScheme.fromSeed(deepPurple), home: LoginPage())`.
+- `MyApp` → `MaterialApp(title: 'Flutter Demo', theme: ColorScheme.fromSeed(deepPurple), home: SplashPage())`. A `SplashPage` decide entre Login e Home conforme a sessão salva.
 
 ## Estrutura
 | Pasta | Papel | README |
@@ -22,7 +22,7 @@ Conter todo o código do app Flutter, organizado em Clean Architecture.
 | `presentation/` | Páginas, widgets, cubits, controllers | [presentation](./presentation/README.md) |
 
 ## Dependências
-- **Internas:** `core/locator.dart`, `presentation/pages/login_page.dart`.
+- **Internas:** `core/locator.dart`, `presentation/pages/splash_page.dart`.
 - **Externas:** `material_ui`.
 
 ## Módulos relacionados

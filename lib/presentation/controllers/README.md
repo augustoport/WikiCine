@@ -11,15 +11,17 @@ Gerenciar estado de UI que não está em cubits: formulário e sessão de login,
 
 ## Funcionalidades existentes
 ### `LoginController extends ChangeNotifier` (lazy singleton)
-Construtor: `LoginController({loginUseCase, getCurrentUserUseCase, logoutUseCase})`.
+Construtor: `LoginController({loginUseCase, getCurrentUserUseCase, logoutUseCase, startGuestSessionUseCase, getAccessModeUseCase})`.
 
 | Membro | Descrição |
 |---|---|
 | `emailController`, `passwordController` | `TextEditingController`s do formulário (o "email" é na prática o **username** TMDB). |
-| `isLoading`, `loadingDrawer`, `currentUser` | Estado observado por `LoginPage`, `DrawerWidget`, `ProfilePage`. |
+| `isLoading`, `loadingDrawer`, `currentUser`, `accessMode` | Estado observado por `SplashPage`, `LoginPage`, `DrawerWidget`, `ProfilePage`. |
+| `isGuest` | `true` sem sessão de conta (visitante ou nenhuma sessão). |
+| `continueAsGuest() → bool` | Chama `StartGuestSessionUseCase`; sucesso → `accessMode = guest`, limpa usuário e campos; falha → `false`. |
 | `login() → bool` | Chama `LoginUseCase`; `true` em sucesso, `false` em qualquer exceção. |
-| `checkExistingSession()` | Chama `GetCurrentUserUseCase`; preenche `currentUser` se houver sessão. |
-| `logout()` | Chama `LogoutUseCase`, limpa `currentUser` e os campos. |
+| `checkExistingSession()` | Chama `GetAccessModeUseCase`; só com `user` chama `GetCurrentUserUseCase` e preenche `currentUser`. |
+| `logout()` | Chama `LogoutUseCase`, limpa `currentUser` e os campos, `accessMode = none`. |
 
 ### `HomeController` (factory)
 | Membro | Descrição |

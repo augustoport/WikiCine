@@ -1,7 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
 import 'core/locator.dart';
-import 'presentation/pages/login_page.dart';
+import 'presentation/pages/splash_page.dart';
 
 void main() {
   setupLocator();
@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: LoginPage(),
+      home: const SplashPage(),
     );
   }
 }

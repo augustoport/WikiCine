@@ -4,6 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../domain/entities/user.dart';
 import '../../../core/shared/env.dart';
 import '../../../core/shared/storage_keys.dart';
+import '../../models/guest_session_model.dart';
 import '../../models/user_model.dart';
 import '../data/auth_data.dart';
 
@@ -54,6 +55,12 @@ class AuthImplementation implements AuthData {
     await _storage.write(key: StorageKeys.accountId, value: accountId);
 
     return UserModel.fromJson(response.data, sessionId);
+  }
+
+  @override
+  Future<GuestSessionModel> createGuestSession() async {
+    final response = await _dio.get('/authentication/guest_session/new');
+    return GuestSessionModel.fromJson(response.data);
   }
 
   Future<String> createRequestToken() async {

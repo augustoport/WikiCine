@@ -192,11 +192,21 @@ class _DrawerWidgetState extends State<DrawerWidget> {
     }
   }
 
+  /// Visitante → login, mantendo a sessão de convidado (spec 001, FR-008).
+  void _handleEnter() {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => LoginPage()),
+      (_) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
       listenable: loginController,
       builder: (context, child) {
+        final isGuest = loginController.isGuest;
         return Material(
           color: AppColors.backgroundColor,
           child: Column(
@@ -209,13 +219,23 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          ClipOval(
-                            child: Image.network(
-                              (loginController.currentUser?.avatar?.tmdb ?? ""),
-                              width: 50,
-                              height: 50,
-                            ),
-                          ),
+                          isGuest
+                              ? Icon(
+                                  Icons.person,
+                                  color: Colors.white,
+                                  size: 50,
+                                )
+                              : ClipOval(
+                                  child: Image.network(
+                                    (loginController
+                                            .currentUser
+                                            ?.avatar
+                                            ?.tmdb ??
+                                        ""),
+                                    width: 50,
+                                    height: 50,
+                                  ),
+                                ),
                           RichText(
                             text: TextSpan(
                               text: "Olá, \n",
@@ -225,9 +245,10 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                               ),
                               children: [
                                 TextSpan(
-                                  text:
-                                      loginController.currentUser?.name ??
-                                      "Usuário",
+                                  text: isGuest
+                                      ? "visitante"
+                                      : loginController.currentUser?.name ??
+                                            "Usuário",
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 24,
@@ -239,17 +260,18 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                         ],
                       ),
               ),
-              ListTile(
-                leading: Icon(Icons.person, color: Colors.white),
-                title: Text("Profile", style: TextStyle(color: Colors.white)),
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => ProfilePage()),
-                  );
-                },
-              ),
+              if (!isGuest)
+                ListTile(
+                  leading: Icon(Icons.person, color: Colors.white),
+                  title: Text("Profile", style: TextStyle(color: Colors.white)),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ProfilePage()),
+                    );
+                  },
+                ),
               ListTile(
                 leading: Icon(Icons.settings, color: Colors.white),
                 title: Text("Settings", style: TextStyle(color: Colors.white)),
@@ -264,11 +286,23 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                 padding: EdgeInsets.only(
                   bottom: MediaQuery.of(context).padding.bottom + 30,
                 ),
-                child: ListTile(
-                  leading: Icon(Icons.exit_to_app, color: Colors.white),
-                  title: Text("Exit", style: TextStyle(color: Colors.white)),
-                  onTap: _handleLogout,
-                ),
+                child: isGuest
+                    ? ListTile(
+                        leading: Icon(Icons.login, color: Colors.white),
+                        title: Text(
+                          "Entrar",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        onTap: _handleEnter,
+                      )
+                    : ListTile(
+                        leading: Icon(Icons.exit_to_app, color: Colors.white),
+                        title: Text(
+                          "Exit",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        onTap: _handleLogout,
+                      ),
               ),
             ],
           ),

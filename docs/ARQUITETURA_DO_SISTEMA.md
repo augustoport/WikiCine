@@ -131,20 +131,20 @@ As regras abaixo descrevem o **contrato desejado**. A coluna "Status" indica a a
 
 | Camada / módulo | Responsabilidade | README local |
 |---|---|---|
-| `lib/main.dart` | Inicializa o locator e monta `MaterialApp` com `LoginPage` como home. | [`lib/README.md`](../lib/README.md) |
+| `lib/main.dart` | Inicializa o locator e monta `MaterialApp` com `SplashPage` como home (decide entre Login e Home). | [`lib/README.md`](../lib/README.md) |
 | `core/locator.dart` | *Composition root*: registra e injeta datasources, repositórios, casos de uso, controllers e cubits. | [`lib/core/README.md`](../lib/core/README.md) |
 | `core/shared/` | Ambiente (`Environment`), chaves de storage (`StorageKeys`), cores (`AppColors`). | [`lib/core/shared/README.md`](../lib/core/shared/README.md) |
-| `domain/entities/` | `Movie`, `TvShow`, `User`, `Avatar`, `Genre`, `Credits`, `CastMember`. | [`lib/domain/entities/README.md`](../lib/domain/entities/README.md) |
+| `domain/entities/` | `Movie`, `TvShow`, `User`, `Avatar`, `Genre`, `Credits`, `CastMember`, `AccessMode`. | [`lib/domain/entities/README.md`](../lib/domain/entities/README.md) |
 | `domain/repositories/` | Contratos `AuthRepository`, `MovieRepository`, `TvRepository`, `UserRepository`. | [`lib/domain/repositories/README.md`](../lib/domain/repositories/README.md) |
-| `domain/usecases/` | 14 casos de uso (auth, movies, tv_show, user). | [`lib/domain/usecases/README.md`](../lib/domain/usecases/README.md) |
+| `domain/usecases/` | 15 casos de uso (auth, movies, tv_show, user). | [`lib/domain/usecases/README.md`](../lib/domain/usecases/README.md) |
 | `data/datasources/` | Chamadas HTTP ao TMDB e acesso ao secure storage. | [`lib/data/datasources/README.md`](../lib/data/datasources/README.md) |
 | `data/models/` | DTOs com (de)serialização JSON. | [`lib/data/models/README.md`](../lib/data/models/README.md) |
 | `data/repositories/` | Implementações dos contratos de domínio (`AuthApi`, `MovieApi`, `TvRepositoryImpl`, `UserApi`). | [`lib/data/repositories/README.md`](../lib/data/repositories/README.md) |
 | `presentation/bloc/` | Estado das telas Home, Detalhe de filme, Detalhe de série, Perfil. | [`lib/presentation/bloc/README.md`](../lib/presentation/bloc/README.md) |
-| `presentation/controllers/` | `LoginController` (sessão) e `HomeController` (busca). | [`lib/presentation/controllers/README.md`](../lib/presentation/controllers/README.md) |
-| `presentation/pages/` | 5 telas: Login, Home (+Drawer), Detalhe de filme, Detalhe de série, Perfil. | [`lib/presentation/pages/README.md`](../lib/presentation/pages/README.md) |
+| `presentation/controllers/` | `LoginController` (sessão e modo de acesso: conta, visitante ou nenhum) e `HomeController` (busca). | [`lib/presentation/controllers/README.md`](../lib/presentation/controllers/README.md) |
+| `presentation/pages/` | 6 telas: Splash, Login, Home (+Drawer), Detalhe de filme, Detalhe de série, Perfil. | [`lib/presentation/pages/README.md`](../lib/presentation/pages/README.md) |
 | `presentation/widgets/` | Componentes visuais reutilizáveis. | [`lib/presentation/widgets/README.md`](../lib/presentation/widgets/README.md) |
-| `test/`, `integration_test/` | Testes unitários (casos de uso), de widget (páginas e widgets de conteúdo) e de integração (fluxo completo com repositórios falsos). | [`test/README.md`](../test/README.md) |
+| `test/`, `integration_test/` | Testes unitários (casos de uso, `AuthApi`, models, cubits, controllers), de widget (páginas e widgets de conteúdo) e de integração (fluxo completo com repositórios falsos). | [`test/README.md`](../test/README.md) |
 
 ---
 
@@ -152,8 +152,9 @@ As regras abaixo descrevem o **contrato desejado**. A coluna "Status" indica a a
 
 ### 6.1 Inicialização
 ```
-main() → setupLocator() → runApp(MyApp) → MaterialApp(home: LoginPage)
+main() → setupLocator() → runApp(MyApp) → MaterialApp(home: SplashPage)
 ```
+A `SplashPage` decide a rota inicial (seção 6.3).
 Não há `WidgetsFlutterBinding.ensureInitialized()` nem `Firebase.initializeApp()`.
 
 ### 6.2 Login (TMDB "validate_with_login")
@@ -171,13 +172,41 @@ LoginPage._handleLogin
                            GET /account?session_id=…
                            secure_storage.write(StorageKeys.accountId)
                       → User (UserModel)
-  └─ sucesso → Navigator.pushReplacement(HomePage)
+                 └─ sucesso → apaga a sessão de convidado (StorageKeys.guestSession*)
+  └─ sucesso → esconde a SnackBar atual → Navigator.pushReplacement(HomePage)
 ```
 Todas as requisições também enviam `Authorization: Bearer <TOKEN>` (token de aplicação, não do usuário).
 
-### 6.3 Sessão existente
-- `LoginPage.initState` e `DrawerWidget.initState` chamam `LoginController.checkExistingSession()` → `GetCurrentUserUseCase` → `AuthApi.getCurrentUser` (lê a sessão; se existir, refaz `getAccountDetails`).
-- **Observação:** a `LoginPage` **não redireciona** para a Home quando há sessão; apenas popula `currentUser`.
+### 6.3 Abertura do app e sessão existente (spec 001)
+```
+SplashPage (indicador de carregamento) → LoginController.checkExistingSession()
+   GetAccessModeUseCase → AuthApi.getAccessMode()            (só storage, sem rede)
+      há StorageKeys.sessionId                         → AccessMode.user
+      há guestSessionId e guestSessionExpiresAt > agora → AccessMode.guest
+      senão (convidado expirado/ilegível é apagado)    → AccessMode.none
+   user  → GetCurrentUserUseCase → AuthApi.getCurrentUser → GET /account   (popula currentUser)
+   guest/none → nenhum dado de conta é consultado
+   none → pushReplacement(LoginPage) · user/guest → pushReplacement(HomePage)
+```
+- `LoginPage.initState` (via `Future.microtask`) e `DrawerWidget.initState` (sem usuário em memória) também chamam `checkExistingSession()`.
+- A sessão de conta **não é validada na rede** na abertura; sessão inválida fica com a D31.
+
+### 6.3b Modo visitante (spec 001)
+```
+LoginPage "Continuar sem login" → LoginController.continueAsGuest()
+   StartGuestSessionUseCase → AuthApi.startGuestSession()
+      convidado válido salvo → reaproveita (sem rede)
+      senão → AuthImplementation.createGuestSession → GET /authentication/guest_session/new
+              → GuestSessionModel(id, expiresAt: "2026-11-17 23:35:17 UTC" → DateTime UTC)
+              → storage: guestSessionId, guestSessionExpiresAt (ISO 8601)
+   sucesso → accessMode = guest → esconde a SnackBar → pushReplacement(HomePage)
+   falha   → SnackBar "Não foi possível entrar como visitante"; continua no login
+```
+Travas do visitante (todas por `IsLoggedInUseCase`, que só é `true` com sessão de **conta**, ou por `LoginController.isGuest`):
+- `MovieCubit`: `canFavorite = false`, favoritos não consultados → coração oculto.
+- `DrawerWidget`: cabeçalho "Olá, visitante" com ícone padrão; sem "Profile"; "Entrar" no lugar de "Exit" → `pushAndRemoveUntil(LoginPage)` **mantendo** a sessão de convidado.
+- `ProfileCubit`: `ProfileRestricted` → `ProfilePage` volta à Home (`pushAndRemoveUntil`).
+- O `guest_session_id` só identifica o modo; nenhuma chamada do catálogo o usa (o catálogo usa o `TOKEN` do app).
 
 ### 6.4 Home (listagem e busca)
 ```
@@ -226,13 +255,14 @@ TvShowDetailPage → getIt<SerieCubit>() → getSerieDetail(id)
 ### 6.7 Perfil
 ```
 Drawer "Profile" → ProfilePage → ProfileCubit.initProfile()
+   IsLoggedInUseCase = false (visitante/sem sessão) → emit ProfileRestricted → volta à Home, sem consultar a conta
    GetUserFavoritesUseCase → UserRepository → UserImplementation → GET /account/{account_id}/favorite/movies
    emit ProfileSuccess(favorites, watchlist: [])  → lista horizontal → tap → MovieDetailPage
    Cabeçalho usa LoginController.currentUser (singleton).
 ```
 
 ### 6.8 Logout
-`DrawerWidget._handleLogout` → `LoginController.logout()` → `LogoutUseCase` → `AuthApi.logout` (apaga `StorageKeys.sessionId` e `StorageKeys.accountId`) → `pushReplacement(LoginPage)`.
+`DrawerWidget._handleLogout` → `LoginController.logout()` → `LogoutUseCase` → `AuthApi.logout` (apaga `StorageKeys.sessionId`, `StorageKeys.accountId` e a sessão de convidado) → `accessMode = none` → `pushReplacement(LoginPage)`.
 
 ### 6.9 Ciclo de vida no locator (`core/locator.dart`)
 | Tipo | Registro |
@@ -240,8 +270,8 @@ Drawer "Profile" → ProfilePage → ProfileCubit.initProfile()
 | `FlutterSecureStorage` | `registerLazySingleton` (compartilhado por `AuthImplementation`, `UserImplementation`, `AuthApi`) |
 | `AuthData`, `MovieData`, `TvData`, `UserData` | `registerLazySingleton` |
 | `AuthRepository`, `MovieRepository`, `TvRepository`, `UserRepository` | `registerLazySingleton` |
-| 14 casos de uso | `registerFactory` |
-| `LoginController` | `registerLazySingleton` (casos de uso injetados no construtor) |
+| 15 casos de uso (inclui `StartGuestSessionUseCase` e `GetAccessModeUseCase`) | `registerFactory` |
+| `LoginController` | `registerLazySingleton` (casos de uso injetados no construtor; guarda `accessMode` e `currentUser`) |
 | `HomeController` | `registerFactory` |
 | `HomeCubit`, `MovieCubit`, `SerieCubit`, `ProfileCubit` | `registerFactory` (casos de uso injetados no construtor) |
 
@@ -261,6 +291,8 @@ Drawer "Profile" → ProfilePage → ProfileCubit.initProfile()
 | B7 | `Image.network("")` sem `errorBuilder` quando o usuário não tem avatar (Drawer e Perfil). **Hipótese:** gera erro de carregamento de imagem em tempo de execução. | `home_page.dart:213`; `profile_page.dart:87` |
 | B8 | ✅ **Resolvido (achado pelos testes).** A aba TV quebrava: `ContentList` lia `show.title` e `TvShow` não tem esse getter (`NoSuchMethodError`). Agora usa `title` para filmes e `name` para séries. | `content_list.dart` |
 | B9 | ✅ **Resolvido (achado pelos testes).** `ListTile`s do Drawer dentro de `Container` com cor de fundo disparavam assertion em modo debug; o fundo passou a ser um `Material`. | `home_page.dart` (`DrawerWidget`) |
+| B11 | ✅ **Resolvido (achado pela integração da spec 001).** Depois de uma senha errada seguida de login certo, a SnackBar "Usuário/Senha incorreto(s)" continuava sobre a Home (o `ScaffoldMessenger` é do app inteiro) e bloqueava a barra Movie/TV. Agora é escondida ao entrar (conta ou visitante). | `login_page.dart` (`_goHome`) |
+| B12 | ✅ **Resolvido (achado pela integração da spec 001).** Com o teclado aberto, a `Column` do login (com o botão "Continuar sem login") estourava a altura e o botão "Login" ficava fora da área de toque. A tela agora rola (`SingleChildScrollView` + `IntrinsicHeight`), mantendo os botões no rodapé quando há espaço. | `login_page.dart` |
 | B10 | ✅ **Resolvido (achado pelos testes).** Logout pelo Drawer disparava "setState() called during build": `LoginPage.initState` chamava `checkExistingSession()` (que notifica o `DrawerWidget` ainda montado) de forma síncrona. Agora é adiado com `Future.microtask`. | `login_page.dart` |
 
 ### 7.2 Violações arquiteturais e acoplamentos
@@ -381,6 +413,8 @@ Drawer "Profile" → ProfilePage → ProfileCubit.initProfile()
 | TMDB | The Movie Database — API pública de filmes/séries. |
 | Request token | Token temporário do TMDB usado para autenticar o usuário. |
 | Session ID | Identificador de sessão do usuário TMDB, salvo em `tmdb_session_id`. |
+| Sessão de convidado | `guest_session_id` do TMDB (validade ~24h), salvo em `tmdb_guest_session_id` + `tmdb_guest_session_expires_at`; identifica o modo visitante. |
+| `AccessMode` | Modo de acesso calculado a partir do storage: `user`, `guest` ou `none`. |
 | `TOKEN` | *API Read Access Token* (Bearer) do TMDB, injetado via `--dart-define`. |
 | `API_KEY` | Chave v3 do TMDB, usada como query param nos endpoints de autenticação. |
 | Composition root | Local único onde o grafo de dependências é montado (`core/locator.dart`). |

@@ -13,16 +13,19 @@ Transformar ações do usuário em chamadas de casos de uso e estados em widgets
 |---|---|---|
 | `bloc/` | `HomeCubit`, `MovieCubit`, `SerieCubit`, `ProfileCubit` + estados | [bloc](./bloc/README.md) |
 | `controllers/` | `LoginController` (ChangeNotifier), `HomeController` | [controllers](./controllers/README.md) |
-| `pages/` | Login, Home (+Drawer), MovieDetail, TvShowDetail, Profile | [pages](./pages/README.md) |
+| `pages/` | Splash, Login, Home (+Drawer), MovieDetail, TvShowDetail, Profile | [pages](./pages/README.md) |
 | `widgets/` | Componentes reutilizáveis | [widgets](./widgets/README.md) |
 
 ## Mapa de navegação
 ```
-LoginPage ──(login ok, pushReplacement)──► HomePage
+SplashPage ──(sem sessão)──► LoginPage · ──(conta ou convidado)──► HomePage
+LoginPage ──(login ok ou "Continuar sem login", pushReplacement)──► HomePage
 HomePage ──(tap card filme)──► MovieDetailPage
 HomePage ──(tap card série)──► TvShowDetailPage
 HomePage.Drawer ──Profile──► ProfilePage ──(tap favorito)──► MovieDetailPage
 HomePage.Drawer ──Exit (pushReplacement)──► LoginPage
+HomePage.Drawer (visitante) ──Entrar (pushAndRemoveUntil)──► LoginPage
+ProfilePage (visitante) ──ProfileRestricted──► HomePage
 ```
 
 ## Dependências
@@ -33,7 +36,7 @@ HomePage.Drawer ──Exit (pushReplacement)──► LoginPage
 - `core/locator.dart` registra todos os cubits e controllers, injetando os casos de uso.
 
 ## Pontos de entrada
-`LoginPage` (home do `MaterialApp`).
+`SplashPage` (home do `MaterialApp`).
 
 ## Fluxos importantes
 Ver seções 6.2–6.8 da arquitetura.

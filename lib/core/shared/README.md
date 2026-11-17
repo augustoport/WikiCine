@@ -12,7 +12,7 @@ Centralizar constantes de ambiente, de armazenamento e de tema usadas por vária
 | Arquivo | Conteúdo |
 |---|---|
 | `env.dart` | `enum Environment { production }` com `baseUrl = https://api.themoviedb.org/3`, `mediaUrl = https://media.themoviedb.org/t/p/w400`, `signupUrl = https://www.themoviedb.org/signup`, `token = String.fromEnvironment('TOKEN')`, `apiKey = String.fromEnvironment('API_KEY')`. |
-| `storage_keys.dart` | `StorageKeys.sessionId = 'tmdb_session_id'`, `StorageKeys.accountId = 'account_id'`. |
+| `storage_keys.dart` | `StorageKeys.sessionId = 'tmdb_session_id'`, `StorageKeys.accountId = 'account_id'`, `StorageKeys.guestSessionId = 'tmdb_guest_session_id'`, `StorageKeys.guestSessionExpiresAt = 'tmdb_guest_session_expires_at'` (ISO 8601, UTC). |
 | `themes/app_colors.dart` | `AppColors.primaryColor = Colors.deepPurple.shade900`, `AppColors.backgroundColor = Colors.grey.shade900` (ambos `static`). |
 
 ## Dependências

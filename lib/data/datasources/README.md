@@ -23,6 +23,7 @@ Todas as requisições usam `baseUrl = Environment.production.baseUrl` e o heade
 | `validateLogin` (idem) | `POST /authentication/token/validate_with_login?api_key` | — |
 | `createSession` (idem) | `POST /authentication/session/new?api_key` | — |
 | `getAccountDetails(sessionId)` | `GET /account?session_id` → `User` | grava `StorageKeys.accountId` |
+| `createGuestSession` | `GET /authentication/guest_session/new` → `GuestSessionModel` | — (quem grava é o `AuthApi`) |
 
 ### `MovieImplementation` implements `MovieData`
 | Método | Requisição | Retorno |

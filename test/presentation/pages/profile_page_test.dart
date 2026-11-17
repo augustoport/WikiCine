@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cinerating/core/locator.dart';
 import 'package:cinerating/presentation/controllers/login_controller.dart';
+import 'package:cinerating/presentation/pages/home_page.dart';
 import 'package:cinerating/presentation/pages/movie_detail_page.dart';
 import 'package:cinerating/presentation/pages/profile_page.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -18,6 +19,8 @@ void main() {
   setUpAll(() => HttpOverrides.global = FakeImageHttpOverrides());
   setUp(() async {
     deps = await setupTestLocator();
+    // Usuário logado: sessão salva (lida pelo ProfileCubit) e em memória.
+    deps.auth.currentUser = Fixtures.user;
     getIt<LoginController>().currentUser = Fixtures.user;
   });
 
@@ -102,5 +105,32 @@ void main() {
 
     expect(find.byType(ProfilePage), findsNothing);
     expect(find.text('abrir perfil'), findsOneWidget);
+  });
+
+  // W11 — FR-010, FR-012 (spec 001, modo visitante)
+  testWidgets('visitante que abre o perfil é levado à Home', (tester) async {
+    deps.auth.currentUser = null;
+    getIt<LoginController>().currentUser = null;
+
+    await pumpProfile(tester);
+
+    expect(find.byType(HomePage), findsOneWidget);
+    expect(find.byType(ProfilePage), findsNothing);
+    expect(deps.user.calls, isEmpty);
+  });
+
+  // W11b — FR-010: sessão de convidado ativa não libera o perfil.
+  testWidgets('com sessão de convidado, perfil também leva à Home', (
+    tester,
+  ) async {
+    deps.auth.currentUser = null;
+    deps.auth.guestSession = true;
+    getIt<LoginController>().currentUser = null;
+
+    await pumpProfile(tester);
+
+    expect(find.byType(HomePage), findsOneWidget);
+    expect(find.byType(ProfilePage), findsNothing);
+    expect(deps.user.calls, isEmpty);
   });
 }

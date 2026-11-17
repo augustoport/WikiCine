@@ -1,3 +1,4 @@
+import 'package:cinerating/presentation/pages/home_page.dart';
 import 'package:cinerating/presentation/pages/movie_detail_page.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -33,10 +34,22 @@ class _ProfilePageState extends State<ProfilePage> {
       body: Column(
         children: [
           ProfileHeader(user: controller.currentUser),
-          BlocBuilder(
+          BlocConsumer<ProfileCubit, ProfileStates>(
             bloc: bloc,
+            // Visitante não vê o perfil: volta à Home (spec 001, FR-010).
+            listener: (context, state) {
+              if (state is ProfileRestricted) {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => const HomePage()),
+                  (_) => false,
+                );
+              }
+            },
             builder: (BuildContext context, state) {
-              if (state is ProfileLoading) {
+              if (state is ProfileLoading ||
+                  state is ProfileInitial ||
+                  state is ProfileRestricted) {
                 return const Center(child: CircularProgressIndicator());
               } else if (state is ProfileSuccess) {
                 return Favorites(favorites: state.favorites);

@@ -16,7 +16,7 @@ Todos os cubits recebem os casos de uso **pelo construtor** e são registrados c
 | `home/` | `HomeCubit` — `getMovies()`, `getMovie(q)`, `getTvShows()`, `getTvShow(q)` | `HomeInitial`, `HomeLoading`, `HomeMovie(movies)`, `HomeTv(tvShows)`, `HomeError(message)` | `GetMoviesUseCase`, `SearchMoviesUseCase`, `GetTvShowsUseCase`, `SearchTvShowsUseCase` |
 | `movie_detail/` | `MovieCubit` — `getMovieDetails(id)`, `toggleFavorite()` | `MovieInitial`, `MovieLoading`, `MovieSuccess(Movie, List<CastMember> cast, CastMember? director, {bool canFavorite})`; enum `FavoriteResult`, `MovieError(message)` | `GetMovieDetailsUseCase`, `GetMovieCrewUseCase`, `GetUserFavoritesUseCase`, `SetMovieFavoriteUseCase`, `IsLoggedInUseCase` |
 | `serie_detail/` | `SerieCubit` — `getSerieDetail(id)` | `SerieInitial`, `SerieLoading`, `SerieSuccess(TvShow, List<CastMember>)`, `SerieError` | `GetTvShowDetailsUseCase`, `GetTvShowCrewUseCase` |
-| `profile/` | `ProfileCubit` — `initProfile()` | `ProfileInitial`, `ProfileLoading`, `ProfileSuccess(favorites, watchlist)`, `ProfileError` | `GetUserFavoritesUseCase` |
+| `profile/` | `ProfileCubit` — `initProfile()` | `ProfileInitial`, `ProfileLoading`, `ProfileSuccess(favorites, watchlist)`, `ProfileError`, `ProfileRestricted` (sem sessão de conta; favoritos não consultados) | `GetUserFavoritesUseCase`, `IsLoggedInUseCase` |
 
 `home`, `movie_detail` e `serie_detail` usam `part`/`part of`; `profile` usa import normal.
 

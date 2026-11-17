@@ -14,3 +14,6 @@ class ProfileSuccess extends ProfileStates {
 }
 
 class ProfileError extends ProfileStates {}
+
+/// Perfil acessado sem sessão de conta (visitante): a página volta à Home.
+class ProfileRestricted extends ProfileStates {}

@@ -18,6 +18,7 @@ Converter JSON do TMDB em objetos Dart e em entidades de domínio.
 | `crew_model.dart` | `CrewModel` | `toEntity() → CastMember` | itens de `cast`/`crew` de `/movie/{id}/credits` |
 | `tv_crew_model.dart` | `TvShowCrew`, `Cast`, `Job`, `Role` | `TvShowCrew.toEntity() → Credits`; `Cast.toEntity() → CastMember` (personagem = `roles[0]`, função = `jobs[0]`) | `/tv/{id}/aggregate_credits` |
 | `user_model.dart` | `UserModel`, `AvatarModel` | estendem `User`, `Avatar` | `/account` |
+| `guest_session_model.dart` | `GuestSessionModel(id, expiresAt)` | sem entidade (usado só pelo `AuthApi`); `fromJson` converte `"2026-11-17 23:35:17 UTC"` para `DateTime` UTC | `/authentication/guest_session/new` |
 
 Padrão: `fromMap`, `toMap`, `fromJson(String)`, `toJson()`, `copyWith` (exceto `GenreModel`, `UserModel`, `AvatarModel`).
 

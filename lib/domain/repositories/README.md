@@ -11,7 +11,7 @@ Inversão de dependência: `domain` declara, `data` implementa. Todos os retorno
 ## Funcionalidades existentes
 | Contrato | Métodos | Implementação |
 |---|---|---|
-| `AuthRepository` | `login({username, password}) → User`; `getCurrentUser() → User?`; `logout()`; `isLoggedIn() → bool` (há sessão salva, sem rede) | `data/repositories/auth_api.dart` (`AuthApi`) |
+| `AuthRepository` | `login({username, password}) → User`; `getCurrentUser() → User?`; `logout()` (apaga conta e convidado); `isLoggedIn() → bool` (há sessão de **conta** salva, sem rede; `false` para visitante); `startGuestSession()` (cria ou reaproveita a sessão de convidado); `getAccessMode() → AccessMode` (sem rede) | `data/repositories/auth_api.dart` (`AuthApi`) |
 | `MovieRepository` | `getMovies()`, `searchMovies(query)` → `List<Movie>`; `getMovieDetails(id) → Movie`; `getMovieCredits(id) → Credits` | `data/repositories/movie_api.dart` (`MovieApi`) |
 | `TvRepository` | `getTvShows()`, `searchTvShows(query)` → `List<TvShow>`; `getTvShowDetails(id) → TvShow`; `getTvShowCredits(id) → Credits` | `data/repositories/tv_api.dart` (`TvRepositoryImpl`) |
 | `UserRepository` | `getUserMovieFavorites() → List<Movie>`; `setMovieFavorite(movieId, {favorite}) → void` (adiciona com `true`, remove com `false`) | `data/repositories/user_api.dart` (`UserApi`) |

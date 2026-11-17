@@ -15,7 +15,9 @@ Todos são registrados como `factory` no locator.
 |---|---|---|---|
 | `auth/` | `LoginUseCase` | `AuthRepository.login` | `LoginController` |
 | `auth/` | `LogoutUseCase` | `AuthRepository.logout` | `LoginController` |
-| `auth/` | `IsLoggedInUseCase` | `AuthRepository.isLoggedIn` — `false` para visitante | `MovieCubit` |
+| `auth/` | `IsLoggedInUseCase` | `AuthRepository.isLoggedIn` — `false` para visitante | `MovieCubit`, `ProfileCubit` |
+| `auth/` | `StartGuestSessionUseCase` | `AuthRepository.startGuestSession` | `LoginController` |
+| `auth/` | `GetAccessModeUseCase` | `AuthRepository.getAccessMode` | `LoginController` |
 | `user/` | `GetCurrentUserUseCase` | `AuthRepository.getCurrentUser` | `LoginController` |
 | `user/` | `GetUserFavoritesUseCase` | `UserRepository.getUserMovieFavorites` | `MovieCubit`, `ProfileCubit` |
 | `user/` | `SetMovieFavoriteUseCase` | `UserRepository.setMovieFavorite(movieId, favorite: bool)` — um único caso de uso para adicionar e remover | `MovieCubit` |
