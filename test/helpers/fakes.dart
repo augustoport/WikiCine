@@ -1,3 +1,4 @@
+import 'package:cinerating/domain/entities/access_mode.dart';
 import 'package:cinerating/domain/entities/credits.dart';
 import 'package:cinerating/domain/entities/movie.dart';
 import 'package:cinerating/domain/entities/tv_show.dart';
@@ -44,8 +45,11 @@ class FakeAuthRepository extends _FakeRepository implements AuthRepository {
   String validUsername = 'cinefilo';
   String validPassword = '123456';
 
-  /// Sessão já existente (retorno de `getCurrentUser`).
+  /// Sessão de conta já existente (retorno de `getCurrentUser`).
   User? currentUser;
+
+  /// Sessão de convidado do TMDB válida salva no aparelho.
+  bool guestSession = false;
 
   @override
   Future<User> login({
@@ -57,7 +61,25 @@ class FakeAuthRepository extends _FakeRepository implements AuthRepository {
       throw FakeRepositoryException('login');
     }
     currentUser = loginUser;
+    guestSession = false;
     return loginUser;
+  }
+
+  /// Cria (ou reaproveita) a sessão de convidado. Falha com
+  /// `failing.add('startGuestSession')`.
+  @override
+  Future<void> startGuestSession() async {
+    await record('startGuestSession');
+    guestSession = true;
+  }
+
+  /// Conta prevalece sobre convidado; sem nenhuma sessão → `none`.
+  @override
+  Future<AccessMode> getAccessMode() async {
+    await record('getAccessMode');
+    if (currentUser != null) return AccessMode.user;
+    if (guestSession) return AccessMode.guest;
+    return AccessMode.none;
   }
 
   @override
@@ -70,9 +92,10 @@ class FakeAuthRepository extends _FakeRepository implements AuthRepository {
   Future<void> logout() async {
     await record('logout');
     currentUser = null;
+    guestSession = false;
   }
 
-  /// Logado quando há [currentUser] (após `login` ou definido no teste).
+  /// Logado (conta) quando há [currentUser]; convidado não conta.
   @override
   Future<bool> isLoggedIn() async {
     await record('isLoggedIn');

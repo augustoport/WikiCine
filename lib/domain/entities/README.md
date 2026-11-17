@@ -18,6 +18,7 @@ Servir de tipo comum entre camadas: retorno de repositórios e casos de uso, est
 | `Credits` | `credits.dart` | `cast` (`List<CastMember>`, padrão `[]`), `director` (`CastMember?`) |
 | `User` | `user.dart` | `id`, `username`, `name`, `avatar`, `sessionId` |
 | `Avatar` | `user.dart` | `gravatar`, `tmdb` (URLs completas ou `''`) |
+| `AccessMode` (enum) | `access_mode.dart` | `user` (sessão de conta), `guest` (sessão de convidado válida), `none` (nenhuma sessão válida) |
 
 ## Dependências
 - **Internas:** `movie.dart` e `tv_show.dart` → `genre.dart`.

@@ -28,8 +28,8 @@ WikiCine é um **aplicativo móvel (Flutter) de consulta a filmes e séries** qu
 
 | Ator | Papel |
 |---|---|
-| **Usuário final (com conta TMDB)** | Faz login, navega, pesquisa, vê detalhes e favoritos. Login é obrigatório para entrar na Home. |
-| **Visitante sem conta TMDB** | Hoje só pode usar o link "Clique aqui" da tela de login, que abre `https://www.themoviedb.org/signup` no navegador. Um modo **guest** está decidido, mas suas regras ainda serão discutidas (P1). |
+| **Usuário final (com conta TMDB)** | Faz login, navega, pesquisa, vê detalhes, favorita filmes e vê o Perfil. Com sessão salva, o app abre direto na Home. |
+| **Visitante sem conta TMDB** | Toca em **"Continuar sem login"** e usa o catálogo inteiro (Home, busca, detalhes) com uma **sessão de convidado do TMDB**, lembrada enquanto for válida (~24h). Não vê favoritar, watchlist, avaliação nem Perfil; pelo menu, **"Entrar"** leva ao login. O link "Clique aqui" abre o cadastro do TMDB. |
 | **TMDB (sistema externo)** | Fornece catálogo, autenticação, dados da conta e favoritos. |
 | **Desenvolvedor/mantenedor** | Fornece `TOKEN` e `API_KEY` do TMDB via `--dart-define` no build. O `TOKEN` é o token de leitura da **conta TMDB pessoal do mantenedor**. |
 | **Firebase (sistema externo)** | Configurado (projeto `cinerating633`), mas **sem uso funcional** no código atual. Decisão (D15): será usado para o **Hosting da versão Web**. |
@@ -37,11 +37,12 @@ WikiCine é um **aplicativo móvel (Flutter) de consulta a filmes e séries** qu
 ## 4. Principais fluxos de negócio
 
 ### F1 — Autenticação
+0. Sem sessão válida, o app abre na tela de login com **"Login"** e **"Continuar sem login"** (modo visitante, ver F7).
 1. Usuário informa usuário e senha do TMDB.
 2. Campos vazios → mensagem "Preencha todos os campos".
 3. App cria *request token*, valida com login/senha, cria sessão e salva o `session_id` de forma segura.
 4. App carrega os dados da conta (nome, username, avatar).
-5. Sucesso → Home. Falha → "Usuário/Senha incorreto(s)".
+5. Sucesso → Home (inclusive quando o login foi aberto pelo "Entrar" do visitante; a sessão de convidado é descartada). Falha → "Usuário/Senha incorreto(s)"; "Continuar sem login" continua disponível.
 
 ### F2 — Navegação de catálogo
 1. Home abre na aba **Movie** com filmes de `discover`.
@@ -71,8 +72,18 @@ WikiCine é um **aplicativo móvel (Flutter) de consulta a filmes e séries** qu
 3. Toque em um favorito abre o detalhe do filme.
 
 ### F6 — Sessão e saída
-1. Ao abrir o app, se houver sessão salva, os dados do usuário são recarregados (mas a tela de login continua sendo exibida). **Decisão (D5):** com sessão válida, o app deve ir direto para a Home.
-2. Menu lateral → **Exit** apaga a sessão local (sessão e conta) e volta ao login. **Decisão (D8):** deve também encerrar a sessão no TMDB.
+1. Ao abrir o app, uma tela de carregamento verifica a sessão salva:
+   - **sessão de conta** → Home, logado (dados do usuário recarregados; a sessão não é validada na rede);
+   - **sessão de convidado válida** → Home, como visitante;
+   - **nenhuma sessão válida** (convidado expirado é descartado) → tela de login.
+2. Menu lateral → **Exit** apaga a sessão local (conta e convidado) e volta ao login. **Decisão (D8):** deve também encerrar a sessão no TMDB.
+
+### F7 — Modo visitante
+1. Na tela de login, **"Continuar sem login"** cria uma sessão de convidado no TMDB (ou reaproveita uma ainda válida) e abre a Home. Se não for possível criá-la, aparece "Não foi possível entrar como visitante" e o usuário fica no login.
+2. O visitante tem leitura completa: filmes, séries, busca e detalhes.
+3. Ficam ocultos: coração de favorito, watchlist e avaliação (quando existirem) e o item **Profile**. O menu mostra "Olá, visitante" com ícone padrão e **"Entrar"** no lugar de "Exit".
+4. "Entrar" leva ao login **sem** descartar a sessão de convidado. Se o visitante chegar ao Perfil, volta para a Home.
+5. Nenhum dado de conta é consultado no modo visitante.
 
 ## 5. Funcionalidades centrais (estado atual)
 
@@ -90,7 +101,8 @@ WikiCine é um **aplicativo móvel (Flutter) de consulta a filmes e séries** qu
 | Marcar/desmarcar favorito de filme | ✅ Implementada (coração no detalhe do filme) |
 | Watchlist | ❌ Estado prevê `watchlist`, sempre vazia |
 | Configurações ("Settings") | ❌ Item de menu sem tela; ação atual sem efeito visível |
-| Login automático com sessão salva | ❌ Sessão é carregada, mas não há redirecionamento |
+| Login automático com sessão salva | ✅ Implementado (conta e visitante; tela de carregamento na abertura) |
+| Modo visitante (sem login) | ✅ Implementado (sessão de convidado do TMDB, lembrada enquanto válida) |
 | Avaliar títulos | ❌ Não implementado |
 | Recursos Firebase | ❌ Apenas configuração |
 
@@ -126,9 +138,9 @@ Estas decisões são a **referência oficial** para as próximas especificaçõe
 | D2 | Natureza do projeto | **Portfólio**: prioridade em qualidade técnica e boas práticas. | — |
 | D3 | Avaliações | O **usuário logado avalia** filmes e séries na conta TMDB (envio de nota). | Não implementado. |
 | D4 | Plataformas | **Android, iOS e Web** são oficiais. | Só Android distribuído. |
-| D5 | Sessão salva | Com sessão válida, **ir direto para a Home** ao abrir o app. | Não implementado (Login sempre aparece). |
+| D5 | Sessão salva | Com sessão válida, **ir direto para a Home** ao abrir o app. | Implementado (spec 001) para sessão de conta, sem validar a sessão na rede (validação fica com a D31). |
 | D6 | Fluxo de login | Manter **usuário e senha** dentro do app (`validate_with_login`). | Implementado. |
-| D7 | Acesso | **Login obrigatório**, mais um **modo guest** (acesso sem login) cujas regras serão definidas depois. | Login obrigatório implementado; guest não. |
+| D7 | Acesso | **Login obrigatório**, mais um **modo guest** (acesso sem login) cujas regras serão definidas depois. | Implementado: login e modo visitante (regras em D20–D22, D34–D37). |
 | D8 | Logout | Encerrar a sessão **também no TMDB** (`DELETE /authentication/session`). | Não implementado (só apaga local). |
 | D9 | Favoritar | O coração no detalhe **marca/desmarca** o favorito na conta TMDB. | ✅ Implementado para filmes (2026-11-16), com toast de sucesso/erro. Séries fora do escopo no momento. |
 | D10 | Favoritos de séries | **Filmes e séries** podem ser favoritos (Perfil e detalhe). | Só filmes, somente leitura. |
@@ -146,9 +158,9 @@ Estas decisões são a **referência oficial** para as próximas especificaçõe
 
 | ID | Tema | Decisão | Situação no código |
 |---|---|---|---|
-| D20 | Modo guest — escopo (P1) | Visitante tem **leitura completa**: Home, busca e detalhes. Não usa sessão guest do TMDB. | Não implementado. |
-| D21 | Modo guest — ações | Para o visitante, favoritar, watchlist, avaliar e o item **Profile** ficam **ocultos**. O menu mostra **"Entrar"**, que leva à tela de login. | Parcial: o coração de favorito do detalhe de filme já fica oculto sem sessão (`IsLoggedInUseCase`). O modo guest em si ainda não existe. |
-| D22 | Entrada no app | Sem sessão, abre a **tela de login** com o botão secundário **"Continuar sem login"**. A escolha de guest **não é lembrada** ao reabrir. | Não implementado. |
+| D20 | Modo guest — escopo (P1) | Visitante tem **leitura completa**: Home, busca e detalhes. ~~Não usa sessão guest do TMDB.~~ **Revisada (2026-11-16, spec 001):** usa uma **sessão de convidado do TMDB** (`GET /authentication/guest_session/new`), guardada no aparelho com a validade informada pelo TMDB. | Implementado (spec 001). |
+| D21 | Modo guest — ações | Para o visitante, favoritar, watchlist, avaliar e o item **Profile** ficam **ocultos**. O menu mostra **"Entrar"**, que leva à tela de login. | Implementado (spec 001). Watchlist e avaliação ainda não existem; a trava vale quando forem criadas. |
+| D22 | Entrada no app | Sem sessão, abre a **tela de login** com o botão secundário **"Continuar sem login"**. ~~A escolha de guest não é lembrada ao reabrir.~~ **Revisada (2026-11-16, spec 001):** a escolha é **lembrada enquanto a sessão de convidado for válida**; expirada, é descartada e o login aparece. | Implementado (spec 001). |
 | D23 | Avaliação — escala (P3) | **5 estrelas com meia estrela** (0,5★ a 5★). O valor enviado ao TMDB é o **dobro** (0,5★ = 1, 5★ = 10). | Não implementado. |
 | D24 | Avaliação — remoção e exibição (P3) | O usuário pode **remover** a nota. A nota dele aparece **no detalhe** ("Sua nota", ao lado da média TMDB), numa **lista "Avaliados" no Perfil** e como **selo nos cards** da Home/busca. | Não implementado. |
 | D25 | Settings — conteúdo (P2) | **Idioma**, **tema** (claro/escuro/sistema) e **Sobre** (versão, crédito obrigatório ao TMDB, link do repositório). Conta/logout continuam no menu lateral. | Não implementado. |
@@ -160,6 +172,10 @@ Estas decisões são a **referência oficial** para as próximas especificaçõe
 | D31 | Erros | **Falhas tipadas**: sem conexão, sessão expirada (401 → volta ao login), não encontrado e desconhecido; mensagem traduzida e botão "Tentar de novo". Sem Crashlytics. | Não implementado. |
 | D32 | Home | Manter **discover** (uma lista por aba, por popularidade) com rolagem infinita (D17). Sem seções nem filtros. | Parcial (1ª página). |
 | D33 | Entrega | **CI no GitHub Actions** (`flutter analyze` + `flutter test` em PRs) e **deploy Web automático** no Firebase Hosting ao fazer merge na `master`. Assinatura de release e lojas ficam **fora do escopo** por ora. | Não implementado. |
+| D34 | Pós-login do visitante | Login feito a partir do "Entrar" do visitante leva **sempre à Home**. | Implementado (spec 001). |
+| D35 | Área restrita | Visitante que acessa uma área restrita (ex.: Perfil) vai **para a Home**, como visitante. | Implementado (spec 001); na Web, depende da D30 para URLs diretas. |
+| D36 | Cabeçalho do visitante | Menu lateral mostra **ícone de pessoa padrão** e **"Olá, visitante"**, sem buscar dados de usuário. | Implementado (spec 001). |
+| D37 | Visitante e avaliação | O visitante **não avalia**, embora a sessão de convidado do TMDB permita. | Regra registrada; avaliação (D3) ainda não existe. |
 
 ### 8.1 Impactos identificados a partir das decisões
 

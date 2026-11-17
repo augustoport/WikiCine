@@ -11,9 +11,9 @@ Definir **entidades**, **contratos de repositório** e **casos de uso** consumid
 ## Submódulos
 | Pasta | Conteúdo | README |
 |---|---|---|
-| `entities/` | `Movie`, `TvShow`, `Genre`, `Credits`, `CastMember`, `User`, `Avatar` | [entities](./entities/README.md) |
+| `entities/` | `Movie`, `TvShow`, `Genre`, `Credits`, `CastMember`, `User`, `Avatar`, `AccessMode` | [entities](./entities/README.md) |
 | `repositories/` | `AuthRepository`, `MovieRepository`, `TvRepository`, `UserRepository` | [repositories](./repositories/README.md) |
-| `usecases/` | 14 casos de uso em `auth/`, `movies/`, `tv_show/`, `user/` | [usecases](./usecases/README.md) |
+| `usecases/` | 15 casos de uso em `auth/`, `movies/`, `tv_show/`, `user/` | [usecases](./usecases/README.md) |
 
 ## Dependências
 - **Internas:** apenas entre seus próprios submódulos (`usecases → repositories → entities`).

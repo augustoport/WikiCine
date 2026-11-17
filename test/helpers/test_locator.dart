@@ -1,5 +1,7 @@
 import 'package:cinerating/core/locator.dart';
+import 'package:cinerating/domain/usecases/auth/get_access_mode_usecase.dart';
 import 'package:cinerating/domain/usecases/auth/is_logged_in_usecase.dart';
+import 'package:cinerating/domain/usecases/auth/start_guest_session_usecase.dart';
 import 'package:cinerating/domain/usecases/auth/login_usecase.dart';
 import 'package:cinerating/domain/usecases/auth/logout_usecase.dart';
 import 'package:cinerating/domain/usecases/movies/get_movie_crew_usecase.dart';
@@ -42,6 +44,8 @@ Future<TestDeps> setupTestLocator() async {
   getIt.registerFactory(() => LoginUseCase(deps.auth));
   getIt.registerFactory(() => LogoutUseCase(deps.auth));
   getIt.registerFactory(() => IsLoggedInUseCase(deps.auth));
+  getIt.registerFactory(() => StartGuestSessionUseCase(deps.auth));
+  getIt.registerFactory(() => GetAccessModeUseCase(deps.auth));
   getIt.registerFactory(() => GetCurrentUserUseCase(deps.auth));
   getIt.registerFactory(() => GetUserFavoritesUseCase(deps.user));
   getIt.registerFactory(() => SetMovieFavoriteUseCase(deps.user));
@@ -60,6 +64,8 @@ Future<TestDeps> setupTestLocator() async {
       loginUseCase: getIt<LoginUseCase>(),
       getCurrentUserUseCase: getIt<GetCurrentUserUseCase>(),
       logoutUseCase: getIt<LogoutUseCase>(),
+      startGuestSessionUseCase: getIt<StartGuestSessionUseCase>(),
+      getAccessModeUseCase: getIt<GetAccessModeUseCase>(),
     ),
   );
   getIt.registerFactory<HomeController>(() => HomeController());
@@ -89,8 +95,10 @@ Future<TestDeps> setupTestLocator() async {
     ),
   );
   getIt.registerFactory<ProfileCubit>(
-    () =>
-        ProfileCubit(getUserFavoritesUseCase: getIt<GetUserFavoritesUseCase>()),
+    () => ProfileCubit(
+      getUserFavoritesUseCase: getIt<GetUserFavoritesUseCase>(),
+      isLoggedInUseCase: getIt<IsLoggedInUseCase>(),
+    ),
   );
 
   return deps;

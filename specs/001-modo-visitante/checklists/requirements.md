@@ -39,3 +39,5 @@
 - Rodada 2 (Clarified): dúvidas respondidas pelo mantenedor em 2026-11-16 (seção Clarifications da spec). Todos os itens aprovados.
 - FR-004 e FR-012 citam "sessão de convidado" e "dados de conta" como regras de negócio (D20, I7), não como detalhe técnico.
 - As três respostas são regras de produto novas; sugerido registrá-las em `docs/OBJETIVO_DO_SISTEMA.md` como decisões.
+- Rodada 3 (revisão do mantenedor, 2026-11-16): adoção da sessão de convidado do TMDB, lembrada enquanto válida, e abertura direta na Home com qualquer sessão válida. FR-004 e FR-005 foram reescritos e FR-013 a FR-017 adicionados. O item "Nenhum requisito contradiz uma decisão Dn" vale contra as decisões **revisadas** D20 e D22 e a D5 antecipada; `docs/OBJETIVO_DO_SISTEMA.md` é atualizado na Fase 3 do plano.
+- Implementação (2026-11-17): Fases 1 a 3 do plano concluídas; `flutter test` e integração no emulador verdes. A verificação final encontrou e corrigiu os bugs B11 e B12 (`docs/ARQUITETURA_DO_SISTEMA.md`, seção 7.1). Decisões D34–D37 registradas em `docs/OBJETIVO_DO_SISTEMA.md`.

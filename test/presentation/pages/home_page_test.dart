@@ -167,6 +167,35 @@ void main() {
       expect(find.byType(TvShowDetailPage), findsOneWidget);
       expect(deps.tv.calls, contains('getTvShowDetails:10'));
     });
+
+    // W10 — FR-003, SC-002, SC-003 (spec 001)
+    testWidgets(
+      'visitante navega por filmes, séries, busca e detalhes sem dados de conta',
+      (tester) async {
+        deps.auth.guestSession = true;
+        await pumpHome(tester);
+
+        await search(tester, 'cidade');
+        expect(find.text(Fixtures.movieB.title!), findsOneWidget);
+
+        await tester.tap(find.text(Fixtures.movieB.title!));
+        await tester.pumpAndSettle();
+        expect(find.byType(MovieDetailPage), findsOneWidget);
+        expect(find.byIcon(Icons.favorite), findsNothing);
+        expect(find.byIcon(Icons.favorite_border), findsNothing);
+        await tester.pageBack();
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('TV'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text(Fixtures.tvA.name!));
+        await tester.pumpAndSettle();
+        expect(find.byType(TvShowDetailPage), findsOneWidget);
+
+        expect(deps.user.calls, isEmpty);
+        expect(deps.auth.calls, isNot(contains('getCurrentUser')));
+      },
+    );
   });
 
   group('DrawerWidget', () {
@@ -207,18 +236,90 @@ void main() {
       );
     });
 
-    testWidgets('sem sessão, exibe "Usuário" como nome padrão', (tester) async {
+    // W9 — FR-011 (antes: "sem sessão, exibe 'Usuário' como nome padrão")
+    testWidgets('sem sessão, exibe "visitante" como nome', (tester) async {
       await pumpHome(tester);
 
       await openDrawer(tester);
 
       expect(
-        find.textContaining('Usuário', findRichText: true),
+        find.textContaining('visitante', findRichText: true),
         findsOneWidget,
       );
+      expect(find.textContaining('Usuário', findRichText: true), findsNothing);
+    });
+
+    /// Spec 001 (modo visitante): plano, seção 4.3, cenários W5–W8.
+    group('visitante', () {
+      // Visitante "de verdade": sessão de convidado do TMDB ativa.
+      setUp(() => deps.auth.guestSession = true);
+
+      Finder inHeader(Finder matching) =>
+          find.descendant(of: find.byType(DrawerHeader), matching: matching);
+
+      // W5 — FR-011
+      testWidgets('cabeçalho com ícone padrão e "Olá, visitante"', (
+        tester,
+      ) async {
+        await pumpHome(tester);
+        await openDrawer(tester);
+
+        expect(inHeader(find.byIcon(Icons.person)), findsOneWidget);
+        expect(inHeader(find.byType(Image)), findsNothing);
+        expect(find.textContaining('Olá', findRichText: true), findsOneWidget);
+        expect(
+          find.textContaining('visitante', findRichText: true),
+          findsOneWidget,
+        );
+      });
+
+      // W6 — FR-007 e premissa "Settings continua"
+      testWidgets('sem "Profile" e "Exit"; com "Settings" e "Entrar"', (
+        tester,
+      ) async {
+        await pumpHome(tester);
+        await openDrawer(tester);
+
+        expect(find.text('Profile'), findsNothing);
+        expect(find.text('Exit'), findsNothing);
+        expect(find.text('Settings'), findsOneWidget);
+        expect(find.text('Entrar'), findsOneWidget);
+      });
+
+      // W7 — FR-008, US3-1, SC-005
+      testWidgets('"Entrar" abre o login, sem logout, e remove a Home', (
+        tester,
+      ) async {
+        await pumpHome(tester);
+        await openDrawer(tester);
+
+        await tester.tap(find.text('Entrar'));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(LoginPage), findsOneWidget);
+        expect(find.byType(HomePage), findsNothing);
+        expect(deps.auth.calls, isNot(contains('logout')));
+        expect(
+          deps.auth.guestSession,
+          isTrue,
+          reason: 'sessão de convidado mantida até o login dar certo',
+        );
+        expect(find.text('Continuar sem login'), findsOneWidget);
+      });
+
+      // W8 — FR-012, SC-003
+      testWidgets('abrir o menu não consulta dados da conta', (tester) async {
+        await pumpHome(tester);
+        await openDrawer(tester);
+
+        expect(deps.auth.calls, isNot(contains('getCurrentUser')));
+        expect(deps.user.calls, isEmpty);
+      });
     });
 
     testWidgets('"Profile" abre a página de perfil', (tester) async {
+      // Sessão de conta salva (o ProfileCubit a confere) e usuário em memória.
+      deps.auth.currentUser = Fixtures.user;
       getIt<LoginController>().currentUser = Fixtures.user;
       await pumpHome(tester);
       await openDrawer(tester);
